@@ -219,6 +219,16 @@ Process Customer Orders (enqCustomer, deqCustomer)
 Process Scheduled Deliveries (enqDelivery, deqDelivery)
 Process Couriers (enqueueCourier, dequeueCourier)
 
+products:
+selectable sets
+Set-C (1 Set) - ₱885.00 15% OFF PLUS SHIPPING FEE INCLUDED!
+Set-C (2 Sets) - ₱1,675 15% OFF PLUS FREE SHIPPING!
+Set-C (3 Sets) - ₱2,470 25% OFF + FREE SHIPPING!
+
+bonus products
+IBB Soap (1 Bar) - ₱148.00 15% OFF!
+Sunshield SPF50 (1 Bottle) - ₱288.00 15% OFF!
+
 tasks:
 1. cart.html: make an cart form with proper Display and add-to-cart function
 2. admin html: create a basic admin dashboard with proper sidebar
@@ -231,6 +241,7 @@ tasks:
 
 instructions: 
 
-Your input should be a particular codeblocks that are updated for changes instead of individual lines
+Your input should be a teh whole particular codeblocks that are updated for changes instead of individual lines
+example of codeblock: /* ===================[ Product Carousel Styles ]=================== */
 
 404loophole
