@@ -1,532 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - Her Choice PH</title>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,600;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Note: Using Open Sans as proxy for Funnel Display (sans-serif) since Funnel Display may be custom; replace with actual font if available -->
-    <style>
-        /* ===================[ Global Styles & Color Palette ]=================== */
-        :root {
-            --background: #FFF7E7;
-            --dark-bg: #6C0002;
-            --text-primary: #6C0002;
-            --gold-accent: #F0B135;
-            --white: #FFFFFF;
-            --gold-hover: #DCB059; /* Lighter gold for hovers */
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cart — Her Choice PH</title>
+  <!-- Google Fonts (reuse from pageMain) -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;600;700&family=Funnel+Display:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css">
+  <style>
+  /* ===================[ Cart Page Styles ]=================== */
+  :root{
+    --bg: #FFF7E7;
+    --dark: #6C0002;
+    --gold: #F0B135;
+    --text: #6C0002;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    --xxs:4px; --xs:8px; --sm:12px; --md:16px; --lg:24px; --xl:32px; --xxl:48px;
+  }
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:'Funnel Display', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  .top-header{background:#490506;color:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 20px;position:sticky;top:0;z-index:30}
+  .top-header a, .top-header button{color:var(--bg);text-decoration:none}
+  .logo{height:44px}
 
-        body {
-            font-family: 'Open Sans', sans-serif; /* Funnel Display proxy */
-            background-color: var(--background);
-            color: var(--text-primary);
-            line-height: 1.5;
-            font-size: 18px; /* Desktop body text */
-        }
+  main.container{max-width:1200px;margin:28px auto;padding:0 20px;display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
 
-        h1, h2, h3 {
-            font-family: 'Merriweather', serif;
-        }
+  /* Left content */
+  .cart-main{background:transparent}
+  .section-card{background:var(--bg);padding:18px;border-radius:8px;border:1px solid rgba(108,0,2,0.06)}
 
-        /* ===================[ Spacing Scale ]=================== */
-        .spacing-xxs { padding: 4px; margin: 4px; }
-        .spacing-xs { padding: 8px; margin: 8px; }
-        .spacing-sm { padding: 12px; margin: 12px; }
-        .spacing-md { padding: 16px; margin: 16px; }
-        .spacing-lg { padding: 24px; margin: 24px; }
-        .spacing-xl { padding: 32px; margin: 32px; }
-        .spacing-xxl { padding: 48px; margin: 48px; }
+  .sets-row{display:flex;flex-direction:column;gap:12px}
+  label.small{font-size:0.9rem;margin-bottom:6px;display:block}
+  select.set-select{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);font-family:inherit;font-size:1rem}
 
-        /* ===================[ Grid System - Desktop ]=================== */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 16px; /* md spacing for sides */
-        }
+  .set-note{font-size:0.9rem;color:rgba(108,0,2,0.85);margin-top:6px}
 
-        .grid-12 {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 24px; /* Gutter */
-        }
+  .extras-list{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .extra-item{background:var(--bg);padding:12px;border-radius:8px;border:1px solid rgba(108,0,2,0.06);display:flex;gap:12px;align-items:center}
+  .extra-item img{width:64px;height:64px;object-fit:cover;border-radius:6px}
+  .extra-meta{flex:1}
+  .extra-title{font-family:'Merriweather', serif;font-weight:600;font-size:1rem}
+  .extra-price{color:var(--dark);font-weight:600;margin-top:6px}
 
-        /* Mobile Grid (<768px) */
-        @media (max-width: 767px) {
-            .grid-12 {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 12px;
-            }
-            body { font-size: 16px; } /* Mobile body text */
-        }
+  .qty-controls{display:flex;align-items:center;gap:8px}
+  .qty-controls button{background:var(--dark);border:none;color:var(--bg);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .qty-display{min-width:32px;text-align:center}
+  .remove-btn{background:transparent;border:1px solid rgba(108,0,2,0.12);color:var(--dark);padding:6px 8px;border-radius:6px;cursor:pointer}
 
-        /* Tablet Grid (768px - 1023px) */
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .grid-12 {
-                grid-template-columns: repeat(8, 1fr);
-                gap: 16px;
-            }
-        }
+  /* Sidebar */
+  aside.cart-sidebar{position:relative}
+  .sidebar-card{background:var(--bg);padding:18px;border-radius:8px;border:1px solid rgba(108,0,2,0.06);display:flex;flex-direction:column;gap:12px}
 
-        /* ===================[ Typography Hierarchy ]=================== */
-        .hero-title {
-            font-family: 'Merriweather', serif;
-            font-weight: 700;
-            font-size: 48px; /* Desktop */
-            line-height: 1.2 * 48px; /* 1.5x but adjusted for headings */
-            text-align: center;
-            color: var(--text-primary);
-        }
+  .total-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:8px;background:transparent;border:1px dashed rgba(240,177,53,0.12)}
+  .total-row .label{font-weight:700;font-family:'Merriweather',serif}
+  .total-row .amount{font-weight:700;color:var(--dark);font-size:1.25rem}
 
-        .section-header {
-            font-family: 'Merriweather', serif;
-            font-weight: 600;
-            font-size: 32px; /* Desktop */
-            line-height: 1.5 * 32px;
-            color: var(--text-primary);
-            margin-bottom: 16px; /* md */
-        }
+  .form-field{display:flex;flex-direction:column;gap:6px}
+  .form-field input,.form-field textarea, .form-field select{padding:10px;border-radius:8px;border:1px solid rgba(108,0,2,0.12);font-size:0.95rem}
+  textarea{min-height:84px;resize:vertical}
 
-        .body-text {
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 400;
-            font-size: 18px; /* Desktop */
-            line-height: 1.5 * 18px;
-            color: var(--text-primary);
-        }
+  .place-order{background:var(--dark);color:var(--bg);border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;font-size:1rem}
+  .place-order:hover{background:var(--gold);color:#6C0002}
 
-        .caption {
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 500;
-            font-size: 14px; /* Desktop */
-            line-height: 1.5 * 14px;
-            color: var(--text-primary);
-        }
+  .undo-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#fff;padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);display:flex;gap:8px;align-items:center;box-shadow:none}
+  .undo-bar button{background:transparent;border:1px solid rgba(108,0,2,0.12);padding:6px 8px;border-radius:6px;color:var(--dark);cursor:pointer}
 
-        /* Mobile Typography */
-        @media (max-width: 767px) {
-            .hero-title { font-size: 32px; line-height: 1.2 * 32px; }
-            .section-header { font-size: 24px; line-height: 1.5 * 24px; }
-        }
-
-        /* ===================[ Header Styles ]=================== */
-        header {
-            background-color: var(--dark-bg);
-            color: var(--background);
-            padding: 16px 0; /* md vertical */
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-family: 'Merriweather', serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--background);
-        }
-
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 32px; /* xl */
-        }
-
-        nav a {
-            color: var(--background);
-            text-decoration: none;
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 500;
-            font-size: 16px;
-            transition: color 250ms ease-in-out;
-        }
-
-        nav a:hover {
-            color: var(--gold-hover);
-            text-decoration: underline;
-        }
-
-        .cart-icon {
-            position: relative;
-            color: var(--background);
-            font-size: 24px;
-        }
-
-        /* Mobile Header */
-        @media (max-width: 767px) {
-            .header-content {
-                justify-content: space-between;
-            }
-            nav ul {
-                display: none; /* Burger menu logic in JS if needed */
-            }
-            .logo {
-                font-size: 20px;
-            }
-        }
-
-        /* ===================[ Button Styles ]=================== */
-        .btn {
-            background-color: var(--dark-bg);
-            color: var(--background);
-            border: none;
-            padding: 12px 24px; /* sm vertical, lg horizontal */
-            border-radius: 4px; /* Subtle rounded corners */
-            font-family: 'Open Sans', sans-serif;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 250ms ease-in-out, transform 250ms ease-in-out;
-            min-height: 44px; /* Accessibility tap target */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn:hover:not(:disabled) {
-            background-color: var(--gold-accent);
-            transform: translateY(-2px); /* Subtle lift, no shadow */
-        }
-
-        .btn:disabled {
-            background-color: rgba(119, 59, 60, 0.4); /* #773b3c at 40% opacity */
-            color: rgba(255, 247, 231, 0.4); /* #FFF7E7 at 40% */
-            cursor: not-allowed;
-        }
-
-        .btn-gold {
-            background-color: var(--gold-accent);
-            color: var(--dark-bg);
-        }
-
-        .btn-gold:hover {
-            background-color: var(--dark-bg);
-            color: var(--background);
-        }
-
-        /* ===================[ Cart Card Styles ]=================== */
-        .cart-item {
-            background-color: var(--background);
-            border: 1px solid var(--gold-accent);
-            padding: 16px; /* md */
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 16px; /* md */
-            margin-bottom: 16px;
-            transition: transform 250ms ease-in-out;
-        }
-
-        .cart-item:hover {
-            transform: translateY(-4px); /* Subtle upward lift, no shadow */
-        }
-
-        .cart-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .cart-item-details h3 {
-            font-family: 'Merriweather', serif;
-            font-size: 20px;
-            margin-bottom: 4px; /* xxs */
-        }
-
-        .cart-item-details .price {
-            font-weight: 600;
-            color: var(--gold-accent);
-            font-size: 18px;
-        }
-
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px; /* xs */
-            margin-left: auto;
-        }
-
-        .quantity-btn {
-            background: none;
-            border: 1px solid var(--gold-accent);
-            color: var(--text-primary);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background-color 250ms ease-in-out;
-        }
-
-        .quantity-btn:hover {
-            background-color: var(--gold-accent);
-        }
-
-        .quantity {
-            min-width: 24px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .remove-btn {
-            background-color: transparent;
-            color: var(--text-primary);
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 4px; /* xxs */
-        }
-
-        /* ===================[ Cart Form & Total ]=================== */
-        .cart-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .cart-total {
-            background-color: var(--background);
-            border-top: 2px solid var(--gold-accent);
-            padding: 24px; /* lg */
-            text-align: center;
-            margin-top: 32px; /* xl */
-        }
-
-        .total-price {
-            font-family: 'Merriweather', serif;
-            font-size: 32px;
-            color: var(--gold-accent);
-            margin-bottom: 16px;
-        }
-
-        /* Empty Cart State */
-        .empty-cart {
-            text-align: center;
-            padding: 48px 16px; /* xxl vertical, md horizontal */
-        }
-
-        .empty-cart h2 {
-            margin-bottom: 16px;
-        }
-
-        /* ===================[ LIFO Cart JS Integration Styles ]=================== */
-        .cart-stack-indicator {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background-color: var(--gold-accent);
-            color: var(--dark-bg);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 250ms ease-in-out;
-        }
-
-        .cart-stack-indicator.show {
-            opacity: 1;
-        }
-
-        /* Animation for Add-to-Cart (LIFO visual fly-in) */
-        @keyframes fly-to-cart {
-            0% { transform: scale(1) translateY(0); opacity: 1; }
-            50% { transform: scale(0.8) translateY(-20px); opacity: 0.7; }
-            100% { transform: scale(0) translateX(100px); opacity: 0; }
-        }
-
-        .flying-item {
-            position: absolute;
-            animation: fly-to-cart 300ms ease-in-out forwards;
-            z-index: 1000;
-        }
-
-        /* ===================[ Footer Styles ]=================== */
-        footer {
-            background-color: var(--dark-bg);
-            color: var(--background);
-            text-align: center;
-            padding: 32px 16px; /* xl vertical, md horizontal */
-            margin-top: 48px; /* xxl */
-        }
-
-        /* Accessibility: Focus States */
-        .btn:focus, .quantity-btn:focus, .remove-btn:focus {
-            outline: 2px solid var(--gold-accent);
-            outline-offset: 2px;
-        }
-
-        /* Ensure contrast: Text on background */
-        /* Verified: #6C0002 on #FFF7E7 has >4.5:1 ratio */
-    </style>
+  @media (max-width:980px){
+    main.container{grid-template-columns:1fr; padding:12px}
+    .extras-list{grid-template-columns:1fr}
+  }
+  </style>
 </head>
 <body>
-    <!-- ===================[ Header ]=================== -->
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">Her Choice PH</div>
-                <nav>
-                    <ul>
-                        <li><a href="pageMain.html">Home</a></li>
-                        <li><a href="cart.html">Cart</a></li>
-                        <li><a href="admin.html">Admin</a></li>
-                    </ul>
-                </nav>
-                <div class="cart-icon">🛒</div> <!-- Cart icon; cart count can be added via JS -->
-            </div>
+  <!-- Reused header from pageMain.html -->
+  <header class="top-header">
+    <div class="header-left">
+      <button class="burger-menu" aria-label="Open menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <img src="logo-small.png" alt="Logo" class="logo-small" style="height:34px;margin-left:8px">
+    </div>
+
+    <nav class="header-middle" style="display:flex;gap:18px;align-items:center">
+      <a href="pageMain.html">Shop</a>
+      <a href="#about-brand">About</a>
+      <a href="#footer">Contact</a>
+      <img src="logo-large.png" alt="Logo" class="logo" style="margin-left:12px">
+    </nav>
+
+    <div class="header-right">
+      <a class="cart-btn" href="cart.html" aria-label="View cart">
+        <span class="material-symbols-outlined">shopping_cart</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="cart-main">
+      <h1 style="font-family:'Merriweather',serif;margin:6px 0 12px 0">Your Cart</h1>
+
+      <div class="section-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:0.95rem;color:rgba(108,0,2,0.9)">Select your Set</div>
+            <label class="small" for="set-select">Available Sets</label>
+            <select id="set-select" class="set-select" aria-label="Select set"></select>
+            <div id="set-note" class="set-note"></div>
+          </div>
+          <div style="min-width:140px;text-align:right">
+            <div style="font-size:0.85rem;color:rgba(108,0,2,0.6)">Selected price</div>
+            <div id="selected-set-price" style="font-family:'Merriweather',serif;font-weight:700;color:var(--dark);font-size:1.1rem">₱0.00</div>
+          </div>
         </div>
-    </header>
 
-    <!-- ===================[ Main Cart Content ]=================== -->
-    <main class="container spacing-xl">
-        <h1 class="hero-title spacing-md">Your Shopping Cart</h1>
+        <hr style="border:none;height:12px">
 
-        <form class="cart-form" id="cartForm">
-            <section class="grid-12">
-                <!-- Cart Items will be dynamically inserted here -->
-                <div id="cartItems" class="col-span-12"></div>
-            </section>
+        <h3 style="font-family:'Merriweather',serif;margin:6px 0">Bonus Products</h3>
+        <div class="extras-list" id="extras-list">
+          <!-- extras injected here -->
+        </div>
+      </div>
 
-            <!-- Cart Total -->
-            <section id="cartTotal" class="cart-total" style="display: none;">
-                <h2 class="section-header">Order Summary</h2>
-                <div class="total-price" id="totalPrice">$0.00</div>
-                <button type="submit" class="btn btn-gold">Proceed to Checkout</button>
-            </section>
+      <div style="height:16px"></div>
 
-            <!-- Empty Cart Message -->
-            <section id="emptyCart" class="empty-cart">
-                <h2 class="section-header">Your cart is empty</h2>
-                <p class="body-text">Add some luxurious beauty products to get started.</p>
-                <button type="button" class="btn" onclick="window.location.href='pageMain.html'">Shop Now</button>
-            </section>
+      <div class="section-card">
+        <h3 style="font-family:'Merriweather',serif;margin:6px 0">Order Summary</h3>
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div>Items subtotal</div>
+          <div id="items-subtotal">₱0.00</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:8px">
+          <div>Shipping</div>
+          <div id="shipping">₱0.00</div>
+        </div>
+        <div style="height:8px"></div>
+        <div class="total-row">
+          <div class="label">Total</div>
+          <div id="cart-total" class="amount">₱0.00</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="cart-sidebar">
+      <div class="sidebar-card">
+        <div class="total-row" style="flex-direction:column;align-items:stretch">
+          <div style="display:flex;justify-content:space-between"><div class="label">Order total</div><div id="sidebar-total-top" class="amount">₱0.00</div></div>
+          <div style="font-size:0.9rem;color:rgba(108,0,2,0.7);margin-top:6px">Please fill all required fields (*)</div>
+        </div>
+
+        <form id="checkout-form" onsubmit="return false" aria-label="Checkout form">
+          <div class="form-field"><label>Fullname*</label><input id="fullname" name="fullname" required placeholder="Juan dela Cruz"></div>
+          <div class="form-field"><label>Phone*</label><input id="phone" name="phone" required placeholder="09xxxxxxxxx"></div>
+          <div class="form-field"><label>Email</label><input id="email" name="email" type="email" placeholder="you@example.com"></div>
+          <div class="form-field"><label>Facebook</label><input id="facebook" name="facebook" placeholder="facebook.com/yourprofile"></div>
+          <div class="form-field"><label>Address*</label><input id="address" name="address" required placeholder="Street, Barangay"></div>
+          <div style="display:grid;grid-template-columns:1fr 120px;gap:8px">
+            <div class="form-field"><label>City</label><input id="city" name="city" placeholder="City/Town"></div>
+            <div class="form-field"><label>Postal Code</label><input id="postal" name="postal" placeholder="1000"></div>
+          </div>
+          <div class="form-field"><label>Mode of payment*</label>
+            <select id="payment-mode" name="payment" required>
+              <option value="cod">Cash on Delivery</option>
+              <option value="gpay">GCash</option>
+              <option value="bank">Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Additional comments</label><textarea id="comments" name="comments" placeholder="Delivery notes, preferred time..."></textarea></div>
+
+          <div style="height:6px"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div id="sidebar-total-bottom" style="display:flex;justify-content:space-between;align-items:center"><strong>Total</strong><strong id="sidebar-total-bottom-amount">₱0.00</strong></div>
+            <button id="place-order" class="place-order">Place order</button>
+          </div>
         </form>
-    </main>
+      </div>
+    </aside>
+  </main>
 
-    <!-- ===================[ LIFO Stack Indicator ]=================== -->
-    <div id="stackIndicator" class="cart-stack-indicator">Item added to cart!</div>
+  <div class="undo-bar" id="undo-bar" style="display:none">
+    <div id="undo-msg">Action added</div>
+    <button id="undo-action">Undo</button>
+    <button id="undo-close">Close</button>
+  </div>
 
-    <!-- ===================[ Footer ]=================== -->
-    <footer>
-        <p class="body-text">&copy; 2023 Her Choice PH. Empowering Beauty.</p>
-    </footer>
+  <script>
+  // Cart page script: manages sets dropdown, extras list, quantities, totals and LIFO push/undo/list
+  (function(){
+    const SETS = [
+      { id: 'set-c-1', name: 'Set-C (1 Set)', price: 885, note: '15% OFF PLUS SHIPPING FEE INCLUDED!' },
+      { id: 'set-c-2', name: 'Set-C (2 Sets)', price: 1675, note: '15% OFF PLUS FREE SHIPPING!' },
+      { id: 'set-c-3', name: 'Set-C (3 Sets)', price: 2470, note: '25% OFF + FREE SHIPPING!' }
+    ];
 
-    <script>
-        /* ===================[ LIFO Cart Data Structure & Functions ]=================== */
-        // LIFO Stack for Cart (Last In, First Out for undo/visual stacking)
-        let cartStack = []; // Array simulating LIFO stack
+    const EXTRAS = [
+      { id: 'ibb-soap', name: 'IBB Soap (1 Bar)', price: 148, note: '15% OFF!' , img:'Resources/Product Section.png'},
+      { id: 'sunshield', name: 'Sunshield SPF50 (1 Bottle)', price: 288, note: '15% OFF!', img:'Resources/Product Section.png'}
+    ];
 
-        function pushCart(item) {
-            cartStack.unshift(item); // Push to front for LIFO
-            listCart();
-            showStackIndicator();
-            animateFlyIn(item); // Visual animation
-        }
+    // storage keys
+    const CART_KEY = 'hc_cart_v1'; // main cart state
+    const STACK_KEY = 'hc_cart_stack_v1'; // LIFO action stack
 
-        function undoCart() {
-            if (cartStack.length > 0) {
-                cartStack.shift(); // Remove from front (LIFO)
-                listCart();
+    function readCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || { set:null, extras: [] }; } catch(e){ return { set:null, extras: [] }; } }
+    function writeCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); renderCart(); }
+
+    // LIFO stack actions (pushCart, undoCart, listCart)
+    function readStack(){ try { return JSON.parse(localStorage.getItem(STACK_KEY)) || []; } catch(e){ return []; } }
+    function writeStack(stack){ localStorage.setItem(STACK_KEY, JSON.stringify(stack)); }
+
+    function pushCart(action){ // action: { type:'add_extra'|'update_qty'|'set_change'|'remove_extra', payload:... }
+      const stack = readStack();
+      stack.push({ ts:Date.now(), action });
+      writeStack(stack);
+      showUndoBar('Action saved — you can undo');
+    }
+
+    function undoCart(){ const stack = readStack(); if (!stack.length) return null; const last = stack.pop(); writeStack(stack); // reverse action
+      const act = last.action;
+      const cart = readCart();
+      if (act.type === 'add_extra'){
+        cart.extras = cart.extras.filter(e=>e.id !== act.payload.id);
+      } else if (act.type === 'remove_extra'){
+        cart.extras.push(act.payload.prev);
+      } else if (act.type === 'update_qty'){
+        const ex = cart.extras.find(e=>e.id===act.payload.id);
+        if (ex) ex.qty = act.payload.prevQty;
+      } else if (act.type === 'set_change'){
+        cart.set = act.payload.prevSet;
+      }
+      writeCart(cart);
+      renderCart();
+      return last;
+    }
+
+    function listCart(){ return readCart(); }
+
+    // UI helpers
+    const setSelect = document.getElementById('set-select');
+    const setNote = document.getElementById('set-note');
+    const selectedPriceEl = document.getElementById('selected-set-price');
+    const extrasListEl = document.getElementById('extras-list');
+    const subtotalEl = document.getElementById('items-subtotal');
+    const shippingEl = document.getElementById('shipping');
+    const cartTotalEl = document.getElementById('cart-total');
+    const sidebarTop = document.getElementById('sidebar-total-top');
+    const sidebarBottom = document.getElementById('sidebar-total-bottom-amount');
+
+    function formatPHPeso(n){ return '₱' + Number(n).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+    // populate sets
+    function initSets(){
+      setSelect.innerHTML = '';
+      SETS.forEach(s=>{
+        const opt = document.createElement('option'); opt.value = s.id; opt.textContent = `${s.name} - ${formatPHPeso(s.price)}`; setSelect.appendChild(opt);
+      });
+      setSelect.addEventListener('change', ()=>{
+        const prev = readCart().set || null;
+        const newSet = SETS.find(s=>s.id===setSelect.value) || null;
+        const cart = readCart();
+        cart.set = newSet ? { id:newSet.id, name:newSet.name, price:newSet.price } : null;
+        writeCart(cart);
+        pushCart({ type:'set_change', payload:{ prevSet: prev, newSet: cart.set } });
+      });
+    }
+
+    // populate extras
+    function renderExtras(){
+      extrasListEl.innerHTML = '';
+      EXTRAS.forEach(ex=>{
+        const item = document.createElement('div'); item.className='extra-item'; item.dataset.id = ex.id;
+        item.innerHTML = `
+          <img src="${ex.img}" alt="${ex.name}">
+          <div class="extra-meta">
+            <div class="extra-title">${ex.name}</div>
+            <div class="extra-price">${formatPHPeso(ex.price)} <span style="font-size:0.8rem;color:rgba(108,0,2,0.6);font-weight:500">${ex.note}</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+            <div class="qty-controls">
+              <button class="dec" aria-label="Decrease">-</button>
+              <div class="qty-display">0</div>
+              <button class="inc" aria-label="Increase">+</button>
+            </div>
+            <div style="display:flex;gap:6px"><button class="remove-btn">Remove</button></div>
+          </div>
+        `;
+
+        // attach behavior
+        const dec = item.querySelector('.dec');
+        const inc = item.querySelector('.inc');
+        const qtyDisplay = item.querySelector('.qty-display');
+        const removeBtn = item.querySelector('.remove-btn');
+
+        function setQty(q, silent){
+          q = Math.max(0, Math.floor(Number(q)||0)); qtyDisplay.textContent = q;
+          const cart = readCart();
+          const existing = cart.extras.find(e=>e.id===ex.id);
+          if (q === 0){
+            if (existing) { // remove
+              const prev = Object.assign({}, existing);
+              cart.extras = cart.extras.filter(x=>x.id!==ex.id);
+              writeCart(cart);
+              pushCart({ type:'remove_extra', payload:{ id:ex.id, prev } });
             }
+          } else {
+            if (existing) { const prevQty = existing.qty || 1; existing.qty = q; writeCart(cart); pushCart({ type:'update_qty', payload:{ id:ex.id, prevQty } }); }
+            else { cart.extras.push({ id:ex.id, name:ex.name, price:ex.price, qty:q }); writeCart(cart); pushCart({ type:'add_extra', payload:{ id:ex.id, qty:q } }); }
+          }
         }
 
-        function listCart() {
-            const cartItemsEl = document.getElementById('cartItems');
-            const totalEl = document.getElementById('totalPrice');
-            const emptyCartEl = document.getElementById('emptyCart');
-            const cartTotalEl = document.getElementById('cartTotal');
+        inc.addEventListener('click', ()=>{ const n = Number(qtyDisplay.textContent)||0; setQty(n+1); });
+        dec.addEventListener('click', ()=>{ const n = Number(qtyDisplay.textContent)||0; setQty(Math.max(0,n-1)); });
+        removeBtn.addEventListener('click', ()=>{ setQty(0); });
 
-            if (cartStack.length === 0) {
-                cartItemsEl.innerHTML = '';
-                emptyCartEl.style.display = 'block';
-                cartTotalEl.style.display = 'none';
-                return;
-            }
+        extrasListEl.appendChild(item);
+      });
+    }
 
-            emptyCartEl.style.display = 'none';
-            cartTotalEl.style.display = 'block';
+    function renderCart(){
+      const cart = readCart();
+      // set selection
+      if (cart.set) { setSelect.value = cart.set.id; const s = SETS.find(x=>x.id===cart.set.id); setNote.textContent = s ? s.note : ''; selectedPriceEl.textContent = formatPHPeso(cart.set.price); }
+      else { setSelect.value = '' ; setNote.textContent=''; selectedPriceEl.textContent = '₱0.00'; }
 
-            let total = 0;
-            cartItemsEl.innerHTML = cartStack.map((item, index) => {
-                total += item.price * item.quantity;
-                return `
-                    <div class="cart-item">
-                        <img src="${item.image}" alt="${item.name}" />
-                        <div class="cart-item-details">
-                            <h3>${item.name}</h3>
-                            <p class="body-text">${item.description}</p>
-                            <div class="price">$${item.price.toFixed(2)}</div>
-                        </div>
-                        <div class="quantity-controls">
-                            <button type="button" class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
-                            <span class="quantity">${item.quantity}</span>
-                            <button type="button" class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
-                            <button type="button" class="remove-btn" onclick="removeFromCart(${index})">✕</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+      // extras quantities
+      EXTRAS.forEach(ex=>{
+        const el = extrasListEl.querySelector(`.extra-item[data-id="${ex.id}"]`);
+        const qtyDisplay = el && el.querySelector('.qty-display');
+        const existing = (cart.extras||[]).find(e=>e.id===ex.id);
+        if (qtyDisplay) qtyDisplay.textContent = existing ? (existing.qty||1) : '0';
+      });
 
-            totalEl.textContent = `$${total.toFixed(2)}`;
-        }
+      // totals
+      let subtotal = 0; if (cart.set) subtotal += Number(cart.set.price||0);
+      (cart.extras||[]).forEach(e=>{ subtotal += Number(e.price||0) * (Number(e.qty)||1); });
+      // determine shipping: if set includes shipping in note for set 1 it's included; let's assume set-c-1 has shipping included, others free shipping for 2 or 3
+      let shipping = 0;
+      if (cart.set && cart.set.id === 'set-c-1') shipping = 0; // included per note
+      else if (cart.set && (cart.set.id === 'set-c-2' || cart.set.id === 'set-c-3')) shipping = 0; // free shipping
+      else shipping = 80; // if no set selected, flat shipping for extras
 
-        function updateQuantity(index, change) {
-            if (cartStack[index]) {
-                cartStack[index].quantity = Math.max(1, cartStack[index].quantity + change);
-                listCart();
-            }
-        }
+      subtotalEl.textContent = formatPHPeso(subtotal);
+      shippingEl.textContent = formatPHPeso(shipping);
+      const total = subtotal + shipping;
+      cartTotalEl.textContent = formatPHPeso(total);
+      sidebarTop.textContent = formatPHPeso(total);
+      sidebarBottom.textContent = formatPHPeso(total);
+      document.getElementById('sidebar-total-bottom-amount').textContent = formatPHPeso(total);
+    }
 
-        function removeFromCart(index) {
-            cartStack.splice(index, 1); // Remove by index (adjusts stack)
-            listCart();
-        }
+    // Undo bar
+    const undoBar = document.getElementById('undo-bar');
+    const undoActionBtn = document.getElementById('undo-action');
+    const undoCloseBtn = document.getElementById('undo-close');
+    function showUndoBar(msg){ document.getElementById('undo-msg').textContent = msg || 'Action saved'; undoBar.style.display = 'flex'; }
+    undoActionBtn.addEventListener('click', ()=>{ undoCart(); undoBar.style.display='none'; });
+    undoCloseBtn.addEventListener('click', ()=>{ undoBar.style.display='none'; });
 
-        function showStackIndicator() {
-            const indicator = document.getElementById('stackIndicator');
-            indicator.classList.add('show');
-            setTimeout(() => indicator.classList.remove('show'), 2000);
-        }
+    // Place order
+    document.getElementById('place-order').addEventListener('click', ()=>{
+      const cart = readCart();
+      const form = document.getElementById('checkout-form');
+      if (!cart.set){ alert('Please select a set before placing an order.'); setSelect.focus(); return; }
+      if (!form.reportValidity()) { return; }
+      // simple order summary and clear cart
+      const order = { cart, customer: {
+        fullname: form.fullname.value,
+        phone: form.phone.value,
+        email: form.email.value,
+        facebook: form.facebook.value,
+        address: form.address.value,
+        city: form.city.value,
+        postal: form.postal.value,
+        payment: form.payment.value,
+        comments: form.comments.value
+      }, total: document.getElementById('cart-total').textContent, created: Date.now() };
+      // for now simulate submission by saving to localStorage 'hc_orders' as FIFO queue
+      try{
+        const orders = JSON.parse(localStorage.getItem('hc_orders_v1')||'[]'); orders.push(order); localStorage.setItem('hc_orders_v1', JSON.stringify(orders));
+      } catch(e){}
+      // clear cart
+      localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY);
+      renderCart();
+      alert('Order placed — thank you! Your order was saved locally (for demo).');
+    });
 
-        function animateFlyIn(item) {
-            // Simulate fly-in animation from a product (in real impl, clone from product card)
-            const flyingImg = document.createElement('img');
-            flyingImg.src = item.image;
-            flyingImg.classList.add('flying-item');
-            flyingImg.style.position = 'fixed';
-            flyingImg.style.left = '50%';
-            flyingImg.style.top = '50%';
-            flyingImg.style.width = '50px';
-            flyingImg.style.height = '50px';
-            flyingImg.style.zIndex = '1000';
-            document.body.appendChild(flyingImg);
+    // initial setup
+    initSets(); renderExtras(); renderCart();
 
-            setTimeout(() => {
-                document.body.removeChild(flyingImg);
-            }, 300);
-        }
-
-        // Example: Add sample items or integrate with product page
-        // For demo, add a sample item on load (in real, trigger from product clicks)
-        document.addEventListener('DOMContentLoaded', () => {
-            // Sample product add (simulate add-to-cart from main page)
-            const sampleProduct = {
-                id: 1,
-                name: 'Luxury Lipstick',
-                description: 'Empowering red shade for modern vintage look.',
-                price: 25.00,
-                quantity: 1,
-                image: 'https://via.placeholder.com/80?text=Lipstick' // Placeholder
-            };
-            pushCart(sampleProduct);
+    // expose API globally for pageMain and other pages
+    window.pushCart = pushCart;
+    window.undoCart = undoCart;
+    window.listCart = listCart;
+    window.__hc_readCart = readCart; window.__hc_writeCart = writeCart;
+  })();
+  </script>
+</body>
+</html>
