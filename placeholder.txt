@@ -1,0 +1,45 @@
+==============================================================
+
+I'm creating a website for A beauty Product business and need you to brainstorm a comprehensive design system that feels unique and memorable.
+
+The project should convey luxurious vibes  and appeal to IT Professors who will judge the output, with a visual style that's modern and a little modern take of vintage.
+
+I'd like you to suggest specific UI component styles, and any unique visual elements or animations that would make this stand out from typical template designs. Please also recommend how the visual hierarchy should guide users toward selling products and suggest 2-3 creative interaction patterns that would surprise and delight users while staying true to the overall brand personality.
+
+Use this color palette
+background / "black"- 490506
+mid Background - AE2628
+light Background - D74547
+text / "white" - FFF7E7
+Primary - DCB059
+
+
+
+
+Based on the design system concept, please create comprehensive design system documentation that includes exact color codes(hex/GB), typography specifications with font families and sizes (use Merriweather and Funnel from google fonts), spacing/grid systems, component guidelines, and usage rules. Make it detailed enough that any Al could implement this system consistently when building the actual website or application, including do's and don'ts for each element. 
+
+Format it as clear, structured documentation that could be handed off to a developer Al for implementation.
+
+
+
+
+
+=========================================================
+For everyone saying the transcript covers the
+prompts i'm sorry! feel free to copy them below
+
+First Prompt:
+I'm creating a [website/app] for [ purpose/target audience] and need you to brainstorm a comprehensive design system that feels unique and memorable.
+
+The project should convey [primary emotion/ feeling you want users to experience] and appeal to [specific target demographic], with a visual style that's [desired aesthetic -modern/vintage/playful/professional/etc.].
+
+I'd like you to suggest a cohesive color palette, typography choices that match the personality, specific Ul component styles, and any unique visual elements or animations that would make this stand out from typical template designs. Please also recommend how the visual hierarchy should guide users toward [primary user action/ goal] and suggest 2-3 creative interaction patterns that would surprise and delight users while staying true to the overall brand personality.
+
+
+
+
+
+Second Prompt:
+Based on the design system concept 'Ipaste the chosen design system name/concept here]', please create comprehensive design system documentation that includes exact color codes(hex/GB), typography specifications with font families and sizes, spacing/grid systems, component guidelines, and usage rules. Make it detailed enough that any Al could implement this system consistently when building the actual website or application, including do's and don'ts for each element. 
+
+Format it as clear, structured documentation that could be handed off to a developer Al for implementation.

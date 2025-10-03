@@ -1,0 +1,236 @@
+Her Choice PH Design System
+
+A modern yet vintage-inspired design system for a beauty product business.
+
+1. Brand Foundations
+1.1 Brand Personality
+
+The website should embody:
+
+Luxury – Elegant and sophisticated visual details with gold accents.
+
+Modern vintage – Modern layouts and animations combined with classic typography and textures.
+
+Trust & Simplicity – Easy navigation and clear calls to action (CTAs).
+
+Warmth & Empowerment – Soft contrasts and inspiring brand messages.
+
+Tone: Empowering, classy, and approachable.
+
+2. Color System
+Purpose	Hex Code	RGB	Usage
+Background 	#FFF7E7	Main background, header/footer backgrounds, modal backdrops
+Dark Background	#6C0002	Button hover states, product highlights, active states
+Text 	#6C0002	Primary text and important labels
+Primary 	#F0B135	CTAs, borders, dividers, icons, luxury accents
+
+2.1 Usage Rules
+
+Dark Background:
+Always used for main body and header/footer backgrounds.
+Do not use for buttons or text backgrounds.
+
+Gold (#F0B135):
+
+Use sparingly for emphasis only (CTA buttons, active states, decorative lines).
+
+Don't overuse to avoid losing its premium feel.
+
+Light Background (#FFF7E7):
+
+Used for hover effects, highlights, or subtle section accents.
+
+Don't use for text or primary body backgrounds.
+
+2.2 Color Ratios
+
+55% background (#FFF7E7)
+
+15% Dark background (#6C0002)
+
+5% Gold accents (#F0B135)
+
+5% text (#6C0002)
+
+3. Typography
+3.1 Font Families
+Font	Use Case
+Merriweather (Serif)	Hero headers, product names, call-to-action headlines
+Funnel Display (Sans-serif)	Navigation menus, body text, small labels
+
+
+3.2 Font Hierarchy & Sizing
+Text Style	Font Family	Weight	Desktop Size	Mobile Size	Usage
+Hero Title	Merriweather	700 (Bold)	48px / 3rem	32px / 2rem	Main tagline or landing hero
+Section Header	Merriweather	600 (Semi)	32px / 2rem	24px / 1.5rem	Section titles (e.g., Shop, About)
+Subheader	Merriweather	400 (Regular)	24px / 1.5rem	20px / 1.25rem	Product categories, highlights
+Body Text	Funnel Display	400 (Regular)	18px / 1.125rem	16px / 1rem	Descriptions, reviews, general text
+Caption/Labels	Funnel Display	500 (Medium)	14px / 0.875rem	12px / 0.75rem	Product labels, button text
+
+3.3 Typography Rules
+
+Do’s
+
+Use Merriweather for all high-importance text (headings, CTAs).
+
+Keep line spacing at 1.5x font size for readability.
+
+Maintain at least 4px padding around text inside buttons or labels.
+
+Don'ts
+
+Avoid all caps on Merriweather headings; use title case instead.
+
+Don’t mix serif and sans-serif in the same text block.
+
+4. Spacing & Grid System
+4.1 Spacing Scale
+Token	Pixels	Usage
+xxs	4px	Fine adjustments, icons
+xs	8px	Small gaps between text
+sm	12px	Component padding
+md	16px	Standard padding/margins
+lg	24px	Section spacing
+xl	32px	Larger layout gaps
+xxl	48px	Major layout breaks
+
+4.2 Grid Layout
+
+Desktop (≥1024px):
+
+12-column grid
+
+Gutter: 24px
+
+Max container width: 1200px
+
+Tablet (768px - 1023px):
+
+8-column grid
+
+Gutter: 16px
+
+Mobile (<768px):
+
+4-column grid
+
+Gutter: 12px
+
+
+5. Component Guidelines
+5.1 Header
+Element	Desktop	Mobile
+Layout	Left logo, center nav, right cart	Left burger menu, center logo, right cart
+Background Color	#490506	#490506
+Hover State	Nav link underline in gold #DCB059	Burger menu slides in with fade animation
+
+
+5.2 Buttons
+State	Background	Text Color	Border
+Default	#6C0002	#FFF7E7	None
+Hover	#F0B135	#FFF7E7	None
+Disabled	#773b3cff	#FFF7E7 (40% opacity)	None
+
+5.3 Cards
+
+Background: #FFF7E7
+
+Padding: 16px
+
+Hover:
+
+Subtle upward lift (translateY(-4px))
+
+Soft shadow fade-in
+
+Do’s
+
+Use consistent image ratios (e.g., 4:3 or square).
+
+Include product name, price, and CTA within each card.
+
+
+5.4 Forms (Admin Panel)
+Element	Style
+Input Fields	Rounded corners, 1px gold border
+Placeholder Text	#6C0002 at 60% opacity
+Submit Button	Gold default state with hover red (#D74547)
+
+6. Interaction Rules
+6.1 Animations
+
+Duration: 250–300ms for hover and focus states.
+
+Easing: ease-in-out for smooth feel.
+
+6.2 Example Interactions
+
+Add-to-Cart (LIFO visual)
+Product image flies into cart icon and stacks behind it.
+
+Scroll Reveal
+Sections fade in with upward motion as user scrolls.
+
+Burger Menu
+Slides in from the left with a 200ms fade.
+
+7. Do's & Don'ts for AI Implementation
+Element	Do	Don't
+Colors	Follow strict usage rules (gold only for emphasis)	Mix gold with background colors
+Typography	Merriweather for headings, Funnel for body text	Use both fonts in same text block
+Spacing	Stick to 8px increments	Random uneven spacing
+Animations	Subtle and elegant	Overly flashy or distracting animations
+Buttons	Rounded corners and contrast maintained	Square corners or unreadable text
+Header	Clear and simple layout	Crowded or too many nav links
+
+8. Accessibility Guidelines
+
+Minimum contrast ratio: 4.5:1 for text.
+
+Ensure all interactive elements have hover and focus states.
+
+Make tap targets at least 44px by 44px for mobile usability.
+
+9. Example Layout Flow
+Header (sticky)
+↓
+Hero Section (tagline + carousel)
+↓
+Featured Products
+↓
+Products "buy item"
+↓
+About/Brand Story
+↓
+Reviews
+↓
+Contact Info Footer
+
+never use shadows in design
+
+Data structure
+LIFO
+add-to-cart (pushCart, undoCart, listCart)
+Track Recent Promotions
+List latest Comment (pushComment, hideComment, listComments)
+
+FIFO
+Process Customer Orders (enqCustomer, deqCustomer)
+Process Scheduled Deliveries (enqDelivery, deqDelivery)
+Process Couriers (enqueueCourier, dequeueCourier)
+
+tasks:
+1. cart.html: make an cart form with proper Display and add-to-cart function
+2. admin html: create a basic admin dashboard with proper sidebar
+3. admin html: create a customer order queue with enqCustomer, deqCustomer
+4. admin html: design a delivery schedule with enqDelivery, deqDelivery
+5. admin html: build a courier management system with enqueueCourier, dequeueCourier
+6. pageMain.html: implement a comment section with pushComment, hideComment, listComments
+7. admin html: build a comment section management
+
+
+instructions: 
+
+Your input should be a particular codeblocks that are updated for changes instead of individual lines
+
+404loophole

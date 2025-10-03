@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Her Choice PH</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Funnel+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top-header">
+    <div class="header-left">
+      <button class="burger-menu" aria-label="Open menu">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <img src="logo-small.png" alt="Logo" class="logo-small">
+    </div>
+
+    <nav class="header-middle">
+      <a href="#product-selection-section">Shop</a>
+      <a href="#about-brand">About</a>
+      <a href="#footer">Contact</a>
+      <img src="logo-large.png" alt="Logo" class="logo">
+    </nav>
+
+    <div class="header-right">
+      <a class="cart-btn" href="cart.html" aria-label="View cart">
+        <span class="material-symbols-outlined">shopping_cart</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <img src="Resources/Hero Background.png" alt="Hero Background" class="hero-bg">
+    <div class="hero-center">
+      <img src="Resources/HeroLogo.png" alt="Hero Logo" class="hero-logo">
+      <div class="hero-tagline">Beauty is a choice, her choice</div>
+      <div class="hero-subtext">
+        Join 1000+ Filipinas who tried the HerChoice PH Set C — and saw real, visible changes in just 30 days.
+      </div>
+      <a href="#" class="hero-cta">Join now</a>
+    </div>
+  </section>
+
+  <section class="product-carousel-section">
+    <div class="carousel-left">
+      <div class="product-info">
+        <h2 id="product-name">Brightening Serum</h2>
+        <p id="product-description">Our best-selling serum that helps even out skin tone and boost glow.</p>
+      </div>
+    </div>
+
+    <div class="carousel-right">
+      <div class="carousel-container" id="carousel-container" aria-live="polite">
+        <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Previous product">&lt;</button>
+        <div class="carousel-track" id="carousel-track">
+          <div class="carousel-item" data-index="0">
+            <img src="Resources/oil.png" alt="Product 1">
+          </div>
+          <div class="carousel-item" data-index="1">
+            <img src="Resources/whitening.png" alt="Product 2">
+          </div>
+          <div class="carousel-item" data-index="2">
+            <img src="Resources/papaya.png" alt="Product 3">
+          </div>
+        </div>
+
+        <button class="carousel-btn carousel-next" id="carousel-next" aria-label="Next product">&gt;</button>
+      </div>
+    </div>
+  </section>
+
+<!-- Product Selection (uses Resources/Product Selection.png as section bg) -->
+  <section class="product-selection-section" aria-label="Product selection">
+    <div class="product-selection-inner">
+      <div class="product-grid" role="list">
+        <!-- Sets (single-select) -->
+        <button class="product-card set-card" data-type="set" data-id="set-c-1" data-name="Set-C (1 Set)" data-price="885" aria-label="Select Set-C (1 Set)">
+          <img src="Resources/set-c-1.png" alt="Set-C (1 Set)">
+          <div class="card-label">
+            <div class="card-title">Set-C (1 Set)</div>
+            <div class="card-price">₱885.00 <span class="muted">15% OFF + shipping</span></div>
+          </div>
+        </button>
+
+        <button class="product-card set-card" data-type="set" data-id="set-c-2" data-name="Set-C (2 Sets)" data-price="1675" aria-label="Select Set-C (2 Sets)">
+          <img src="Resources/set-c-2.png" alt="Set-C (2 Sets)">
+          <div class="card-label">
+            <div class="card-title">Set-C (2 Sets)</div>
+            <div class="card-price">₱1,675 <span class="muted">15% OFF + FREE shipping</span></div>
+          </div>
+        </button>
+
+        <button class="product-card set-card" data-type="set" data-id="set-c-3" data-name="Set-C (3 Sets)" data-price="2470" aria-label="Select Set-C (3 Sets)">
+          <img src="Resources/set-c-3.png" alt="Set-C (3 Sets)">
+          <div class="card-label">
+            <div class="card-title">Set-C (3 Sets)</div>
+            <div class="card-price">₱2,470 <span class="muted">25% OFF + FREE shipping</span></div>
+          </div>
+        </button>
+
+        <!-- Extras now individual selectable cards (multi-select) -->
+        <button class="product-card extra-card" data-type="extra" data-id="extra-1" data-name="Brightening Serum" data-price="485" aria-pressed="false">
+          <img src="Resources/extra-brightening.png" alt="Brightening Serum">
+          <div class="card-label">
+            <div class="card-title">Brightening Serum</div>
+            <div class="card-price">₱485</div>
+          </div>
+        </button>
+
+        <button class="product-card extra-card" data-type="extra" data-id="extra-2" data-name="Hydrating Toner" data-price="375" aria-pressed="false">
+          <img src="Resources/extra-toner.png" alt="Hydrating Toner">
+          <div class="card-label">
+            <div class="card-title">Hydrating Toner</div>
+            <div class="card-price">₱375</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+<!-- Combined About + Customer Reviews (moved About inside Reviews section) -->
+<section class="customer-reviews-section" aria-label="Customer reviews">
+  <div class="combined-inner">
+    <!-- About Brand (moved here) -->
+    <div class="about-inner">
+      <div class="about-media">
+        <img src="Resources/about-image.png" alt="About Her Choice PH">
+      </div>
+      <div class="about-text">
+        <h2>About Her Choice PH</h2>
+        <p>
+          Built on trust, heritage and visible results. Her Choice PH combines modern formulation with classic sensibilities to deliver skincare that feels luxurious and works.
+        </p>
+        <p>
+          Our mission is to empower Filipinas with simple, effective products made for everyday beauty.
+        </p>
+        <a class="primary-cta" href="/about">Learn more</a>
+      </div>
+    </div>
+
+    <!-- Customer Reviews -->
+    <div class="reviews-inner">
+      <h2 class="section-title">Customer Reviews</h2>
+      <div class="reviews-grid">
+        <!-- 12 items (4 rows × 3 columns) -->
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review1.png" alt=""></div>
+          <div class="review-text"><p>“I saw results in 2 weeks.” — Maria</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review2.png" alt=""></div>
+          <div class="review-text"><p>“My skin feels renewed.” — Ana</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review3.png" alt=""></div>
+          <div class="review-text"><p>“Gentle and effective.” — Joy</p></div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review4.png" alt=""></div>
+          <div class="review-text"><p>“Love the glow.” — Ella</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review5.png" alt=""></div>
+          <div class="review-text"><p>“No irritation.” — Carla</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review6.png" alt=""></div>
+          <div class="review-text"><p>“Packaging is beautiful.” — Lina</p></div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review7.png" alt=""></div>
+          <div class="review-text"><p>“My skin looks brighter.” — May</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review8.png" alt=""></div>
+          <div class="review-text"><p>“Feels premium.” — Tess</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review9.png" alt=""></div>
+          <div class="review-text"><p>“Quick results.” — June</p></div>
+        </div>
+
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review10.png" alt=""></div>
+          <div class="review-text"><p>“Highly recommend.” — Ria</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review11.png" alt=""></div>
+          <div class="review-text"><p>“Soft texture.” — Bea</p></div>
+        </div>
+        <div class="review-item">
+          <div class="review-media"><img src="Resources/review12.png" alt=""></div>
+          <div class="review-text"><p>“Results in 30 days.” — Joy</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- undo toast -->
+  <div id="undo-toast" role="status" aria-live="polite">
+    <span id="undo-msg">Added to cart</span>
+    <button id="undo-btn">Undo</button>
+    <button id="undo-close" class="confirm">OK</button>
+  </div>
+
+
+  <script>
+    // Sticky header background toggle (optional, can be removed since header is always #490506)
+    const header = document.querySelector('.top-header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  </script>
+// ...existing code...
+<script>
+// Carousel + product-grid state script
+// - Initializes carousel (prev/next/keyboard)
+// - Exposes simple API window.__hc_carousel.goTo(n)
+// - Tracks product-grid selection state via localStorage and toggles .has-selection
+(function () {
+  /* ---------- Carousel initialization & controls ---------- */
+  const items = Array.from(document.querySelectorAll('.carousel-item'));
+  if (items.length) {
+    let idx = 0;
+    const prevBtn = document.getElementById('carousel-prev');
+    const nextBtn = document.getElementById('carousel-next');
+
+    function renderCarousel() {
+      items.forEach((it, i) => {
+        it.classList.remove('is-active', 'is-next', 'is-hidden');
+        if (i === idx) it.classList.add('is-active');
+        else if (i === idx + 1) it.classList.add('is-next');
+        else it.classList.add('is-hidden');
+      });
+      if (prevBtn) prevBtn.disabled = idx === 0;
+      if (nextBtn) nextBtn.disabled = idx === items.length - 1;
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => { if (idx > 0) { idx--; renderCarousel(); } });
+    if (nextBtn) nextBtn.addEventListener('click', () => { if (idx < items.length - 1) { idx++; renderCarousel(); } });
+
+    // keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { if (idx > 0) { idx--; renderCarousel(); } }
+      if (e.key === 'ArrowRight') { if (idx < items.length - 1) { idx++; renderCarousel(); } }
+    }, { passive: true });
+
+    // expose for other scripts
+    window.__hc_carousel = {
+      goTo: (n) => { if (typeof n === 'number' && n >= 0 && n < items.length) { idx = n; renderCarousel(); } },
+      next: () => { if (idx < items.length - 1) { idx++; renderCarousel(); } },
+      prev: () => { if (idx > 0) { idx--; renderCarousel(); } }
+    };
+
+    // initial render
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderCarousel);
+    else renderCarousel();
+  } // end carousel
+
+  /* ---------- Product selection grid state updater (ensure default full opacity) ---------- */
+  const STORAGE_KEY = 'hc_cart_v1';
+  const grid = document.querySelector('.product-grid');
+
+  function readCart() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; }
+    catch (e) { return { set: null, extras: [] }; }
+  }
+  function writeCart(cart) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
+    catch (e) { /* ignore storage errors */ }
+    updateGridSelectionState(cart);
+  }
+
+  function updateGridSelectionState(cart) {
+    if (!grid) return;
+    if (cart && cart.set) grid.classList.add('has-selection');
+    else grid.classList.remove('has-selection');
+  }
+
+  // initialize UI from storage and ensure grid state is consistent
+  function initGridState() {
+    const cart = readCart();
+    // ensure existing selected UI matches storage (non-destructive)
+    if (cart.set) {
+      document.querySelectorAll('.product-card.set-card').forEach(s => s.classList.toggle('selected', s.dataset.id === cart.set.id));
+    } else {
+      document.querySelectorAll('.product-card.set-card').forEach(s => s.classList.remove('selected'));
+    }
+    (cart.extras || []).forEach(e => {
+      const el = document.querySelector(`.product-card.extra-card[data-id="${e.id}"]`);
+      if (el) { el.classList.add('selected'); el.setAttribute('aria-pressed', 'true'); }
+    });
+    updateGridSelectionState(cart);
+  }
+
+  // Expose helper to update state externally
+  window.__hc_updateGridState = updateGridSelectionState;
+  window.__hc_readCart = readCart;
+  window.__hc_writeCart = writeCart;
+
+  // Run initialization after DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGridState);
+  } else initGridState();
+})();
+</script>
+// ...existing code...
+  <script>
+  // filepath: /home/kyusi/Downloads/BeuPro/pageMain.html
+  // ...existing code...
+  (function(){
+    const STORAGE_KEY = 'hc_cart_v1';
+
+    function readCart(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; } catch(e){ return { set: null, extras: [] }; } }
+    function writeCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
+
+    // set selection (radio-like)
+    document.querySelectorAll('.product-card.set-card').forEach(btn=>{
+      btn.addEventListener('click', ()=> {
+        const cart = readCart();
+        cart.set = { id: btn.dataset.id, name: btn.dataset.name, price: Number(btn.dataset.price) };
+        writeCart(cart);
+        // UI: only one selected set
+        document.querySelectorAll('.product-card.set-card').forEach(s=>s.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    // extras selection (toggle)
+    document.querySelectorAll('.product-card.extra-card').forEach(btn=>{
+      btn.addEventListener('click', ()=> {
+        const cart = readCart();
+        const id = btn.dataset.id;
+        const existing = cart.extras.find(e=>e.id===id);
+        if (existing) {
+          cart.extras = cart.extras.filter(e=>e.id!==id);
+          btn.classList.remove('selected');
+          btn.setAttribute('aria-pressed','false');
+        } else {
+          cart.extras.push({ id, name: btn.dataset.name, price: Number(btn.dataset.price) });
+          btn.classList.add('selected');
+          btn.setAttribute('aria-pressed','true');
+        }
+        writeCart(cart);
+      });
+    });
+
+    // initialize UI from storage
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const cart = readCart();
+      if (cart.set) {
+        const sel = document.querySelector(`.product-card.set-card[data-id="${cart.set.id}"]`);
+        if (sel) sel.classList.add('selected');
+      }
+      (cart.extras || []).forEach(e=>{
+        const el = document.querySelector(`.product-card.extra-card[data-id="${e.id}"]`);
+        if (el) { el.classList.add('selected'); el.setAttribute('aria-pressed','true'); }
+      });
+    });
+  })();
+  </script>
+
+</body>
+</html>

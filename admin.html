@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Her Choice PH</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Funnel+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* small admin overrides for clarity */
+    .admin-wrap{max-width:1100px;margin:28px auto;color:#FFF7E7;padding:16px;}
+    .panel{background:rgba(255,255,255,0.02);padding:14px;border-radius:10px;margin-bottom:16px;border:1px solid rgba(220,176,89,0.06);}
+    .panel h3{font-family:'Merriweather',serif;color:#DCB059;margin:0 0 8px;}
+    .order-row{display:flex;justify-content:space-between;gap:12px;padding:8px;border-bottom:1px solid rgba(255,255,255,0.02);}
+    .btn{background:#DCB059;color:#490506;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;}
+    .danger{background:#D74547;color:#FFF7E7;}
+    pre{white-space:pre-wrap;word-break:break-word;color:#FFF7E7;}
+  </style>
+</head>
+<body style="background:#490506;">
+
+  <header class="top-header" style="position:static;">
+    <div class="header-left">
+      <a href="pageMain.html" style="color:#FFF7E7;text-decoration:none;font-weight:700;">← Site</a>
+    </div>
+    <div class="header-right" style="margin-left:auto">
+      <a href="cart.html" style="color:#FFF7E7;text-decoration:none;font-weight:700;margin-right:12px;">Cart</a>
+    </div>
+  </header>
+
+  <main class="admin-wrap" role="main">
+    <section class="panel" id="auth-panel">
+      <h3>Admin (local demo)</h3>
+      <p style="margin:0 0 8px">Demo login (no backend). Use any email; Gmail recommended for later integration.</p>
+      <label style="display:block;margin-bottom:8px"><input id="admin-email" placeholder="admin@gmail.com"> Email</label>
+      <label style="display:block;margin-bottom:8px"><input id="admin-pass" type="password" placeholder="password"> Password</label>
+      <button id="admin-login" class="btn">Sign in</button>
+      <span id="auth-msg" style="margin-left:12px;color:#FFF7E7"></span>
+    </section>
+
+    <section class="panel" id="orders-panel">
+      <h3>Orders Queue (FIFO)</h3>
+      <div id="orders-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;">
+        <button id="dequeue-order" class="btn">Dequeue & View Oldest</button>
+        <button id="confirm-oldest" class="btn">Confirm Oldest (move to Deliveries)</button>
+      </div>
+    </section>
+
+    <section class="panel" id="deliveries-panel">
+      <h3>Deliveries Queue</h3>
+      <div id="deliveries-list"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="dequeue-delivery" class="btn danger">Mark Oldest Delivered</button>
+      </div>
+    </section>
+
+    <section class="panel" id="inventory-panel">
+      <h3>Inventory (manual)</h3>
+      <div id="inventory-list" style="margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="inv-name" placeholder="Product id/name">
+        <input id="inv-count" type="number" placeholder="qty" style="width:90px;">
+        <button id="inv-add" class="btn">Add / Update</button>
+      </div>
+    </section>
+
+    <section class="panel" id="raw-panel">
+      <h3>Raw queues (debug)</h3>
+      <pre id="raw-output"></pre>
+    </section>
+  </main>
+
+<script>
+/* filepath: /home/kyusi/Downloads/BeuPro/admin.html
+   Minimal admin demo: reads/writes orders & deliveries in localStorage.
+   FIFO behavior: enqueue -> push, dequeue -> shift.
+*/
+(function(){
+  const ORDERS_KEY = 'orders_queue';
+  const DELIVERIES_KEY = 'deliveries_queue';
+  const INVENTORY_KEY = 'hc_inventory';
+
+  const ordersListEl = document.getElementById('orders-list');
+  const deliveriesListEl = document.getElementById('deliveries-list');
+  const rawOut = document.getElementById('raw-output');
+
+  function readQueue(key){ try { return JSON.parse(localStorage.getItem(key)) || []; } catch(e){ return []; } }
+  function writeQueue(key, v){ localStorage.setItem(key, JSON.stringify(v)); renderAll(); }
+
+  function renderOrders(){
+    const q = readQueue(ORDERS_KEY);
+    ordersListEl.innerHTML = '';
+    if (!q.length) { ordersListEl.textContent = 'No orders queued.'; return; }
+    q.forEach((o, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'order-row';
+      row.innerHTML = `<div style="flex:1"><strong>${o.id}</strong> — ${o.buyer.fullname} • ${o.cart.set ? o.cart.set.name : 'No set'}</div>
+                       <div style="display:flex;gap:8px">
+                         <button data-idx="${idx}" class="btn view-order">View</button>
+                         <button data-idx="${idx}" class="btn confirm-order">Confirm</button>
+                       </div>`;
+      ordersListEl.appendChild(row);
+    });
+    // attach handlers
+    Array.from(document.querySelectorAll('.view-order')).forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        const idx = Number(e.currentTarget.dataset.idx);
+        const q = readQueue(ORDERS_KEY);
+        alert(JSON.stringify(q[idx], null, 2));
+      });
+    });
+    Array.from(document.querySelectorAll('.confirm-order')).forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        const idx = Number(e.currentTarget.dataset.idx);
+        const q = readQueue(ORDERS_KEY);
+        const item = q.splice(idx,1)[0];
+        // set status and push to deliveries
+        item.status = 'confirmed';
+        const d = readQueue(DELIVERIES_KEY);
+        d.push(item);
+        writeQueue(ORDERS_KEY, q);
+        writeQueue(DELIVERIES_KEY, d);
+        alert('Order confirmed and moved to Deliveries.');
+      });
+    });
+  }
+
+  function renderDeliveries(){
+    const q = readQueue(DELIVERIES_KEY);
+    deliveriesListEl.innerHTML = '';
+    if (!q.length) { deliveriesListEl.textContent = 'No deliveries queued.'; return; }
+    q.forEach((d, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'order-row';
+      row.innerHTML = `<div style="flex:1"><strong>${d.id}</strong> — ${d.buyer.fullname} • ${d.cart.set ? d.cart.set.name : ''}</div>
+                       <div style="display:flex;gap:8px">
+                         <button data-idx="${idx}" class="btn view-del">View</button>
+                         <button data-idx="${idx}" class="btn danger pop-del">Delivered</button>
+                       </div>`;
+      deliveriesListEl.appendChild(row);
+    });
+
+    Array.from(document.querySelectorAll('.view-del')).forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        const idx = Number(e.currentTarget.dataset.idx);
+        const q = readQueue(DELIVERIES_KEY);
+        alert(JSON.stringify(q[idx], null, 2));
+      });
+    });
+    Array.from(document.querySelectorAll('.pop-del')).forEach(b=>{
+      b.addEventListener('click', (e)=>{
+        const idx = Number(e.currentTarget.dataset.idx);
+        const q = readQueue(DELIVERIES_KEY);
+        q.splice(idx,1);
+        writeQueue(DELIVERIES_KEY, q);
+        alert('Marked delivered and removed from queue.');
+      });
+    });
+  }
+
+  function renderInventory(){
+    const inv = JSON.parse(localStorage.getItem(INVENTORY_KEY) || '{}');
+    const target = document.getElementById('inventory-list');
+    target.innerHTML = '';
+    if (Object.keys(inv).length === 0) { target.textContent = 'No inventory entries.'; return; }
+    Object.keys(inv).forEach(k=>{
+      const row = document.createElement('div');
+      row.className = 'order-row';
+      row.innerHTML = `<div style="flex:1">${k}</div><div>${inv[k]}</div>`;
+      target.appendChild(row);
+    });
+  }
+
+  function renderAll(){
+    renderOrders();
+    renderDeliveries();
+    renderInventory();
+    rawOut.textContent = `orders_queue: ${localStorage.getItem(ORDERS_KEY)}\n\ndeliveries_queue: ${localStorage.getItem(DELIVERIES_KEY)}\n\ninventory: ${localStorage.getItem(INVENTORY_KEY)}`;
+  }
+
+  // controls
+  document.getElementById('dequeue-order').addEventListener('click', ()=>{
+    const q = readQueue(ORDERS_KEY);
+    if (!q.length) return alert('No orders.');
+    const item = q.shift(); // FIFO dequeue
+    writeQueue(ORDERS_KEY, q);
+    alert('Dequeued oldest order:\n' + JSON.stringify(item, null, 2));
+  });
+  document.getElementById('confirm-oldest').addEventListener('click', ()=>{
+    const q = readQueue(ORDERS_KEY);
+    if (!q.length) return alert('No orders.');
+    const item = q.shift();
+    item.status = 'confirmed';
+    const d = readQueue(DELIVERIES_KEY);
+    d.push(item);
+    writeQueue(ORDERS_KEY, q);
+    writeQueue(DELIVERIES_KEY, d);
+    alert('Oldest order confirmed and moved to Deliveries.');
+  });
+
+  document.getElementById('dequeue-delivery').addEventListener('click', ()=>{
+    const q = readQueue(DELIVERIES_KEY);
+    if (!q.length) return alert('No deliveries queued.');
+    const item = q.shift();
+    writeQueue(DELIVERIES_KEY, q);
+    alert('Marked delivered (dequeued):\n' + JSON.stringify(item, null, 2));
+  });
+
+  document.getElementById('inv-add').addEventListener('click', ()=>{
+    const name = document.getElementById('inv-name').value.trim();
+    const count = Number(document.getElementById('inv-count').value || 0);
+    if (!name) return alert('Enter product id/name.');
+    const inv = JSON.parse(localStorage.getItem(INVENTORY_KEY) || '{}');
+    inv[name] = (inv[name] || 0) + count;
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv));
+    renderAll();
+  });
+
+  // auth demo (no server)
+  document.getElementById('admin-login').addEventListener('click', ()=>{
+    const email = document.getElementById('admin-email').value.trim();
+    if (!email) return document.getElementById('auth-msg').textContent = 'Enter email.';
+    document.getElementById('auth-msg').textContent = 'Signed in (demo).';
+  });
+
+  // initial
+  renderAll();
+})();
+</script>
+</body>
+</html>

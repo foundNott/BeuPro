@@ -1,0 +1,53 @@
+System Reference Prompt
+
+I’m building a beauty product website called Her Choice PH using HTML, CSS, and JavaScript with these files:
+
+pageMain.html (landing page)
+
+styles.css (styling, based on provided design system)
+
+sys.js (main logic and interactivity)
+
+cart.html (cart and checkout page)
+
+admin.html (admin dashboard)
+
+System Flow
+
+Customer Experience
+
+Enters landing page with scrollable UI.
+
+Sticky header with buttons: Shop scrolls to product section, About scrolls to brand section, Contact scrolls to footer.
+
+Can add one product set (changeable) + two extra products.
+
+On add-to-cart, a 2-second bottom popup shows “Undo action?”.
+
+Cart page allows editing sets and removing extras.
+
+Checkout form collects full name, address, Facebook, email, phone, and payment method.
+
+On order submit, a popup confirms that the order is queued; customer is later contacted via email/phone for confirmation.
+
+Admin Experience
+
+Enters a special admin link/page.
+
+Logs in with account + password, verified via Gmail.
+
+Dashboard shows orders and product stocks.
+
+Stocks auto-update when orders are confirmed.
+
+Optionally, customers get free email/SMS notifications when admin inputs expected delivery details.
+
+Confirmed orders are queued into the Deliveries board.
+
+GCash orders are auto-confirmed and prioritized in delivery.
+
+Customer comments auto-list; admin can “pop” and move verified comments to the top.
+
+Admin manually contacts customers via Messenger; fallback is phone/email.
+
+Design Style

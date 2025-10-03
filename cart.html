@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cart - Her Choice PH</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Funnel+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Cart specific layout (follows design system; no shadows) */
+    .cart-layout { max-width:1200px; margin:24px auto; display:flex; gap:24px; padding:0 16px; box-sizing:border-box; color:var(--text, #FFF7E7); }
+    .cart-main { flex: 1 1 64%; background: transparent; }
+    .cart-sidebar { width: 360px; background: transparent; padding: 12px; box-sizing:border-box; }
+    .section-panel { background: rgba(255,255,255,0.02); border:1px solid rgba(220,176,89,0.06); padding:16px; border-radius:10px; margin-bottom:16px; }
+    .section-title { font-family:'Merriweather', serif; color:#DCB059; margin:0 0 10px; font-size:1.05rem; }
+    /* Sets area */
+    .chosen-set { display:flex; gap:12px; align-items:center; }
+    .set-thumb { width:110px; height:80px; object-fit:cover; border-radius:8px; background:transparent; }
+    .set-select { flex:1; display:flex; flex-direction:column; gap:8px; }
+    .price-flag { font-weight:700; font-family:'Merriweather',serif; color:#FFF7E7; }
+    /* extras list */
+    .extras-list { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+    .extras-row { display:flex; gap:12px; align-items:center; justify-content:space-between; background:transparent; padding:8px; border-radius:8px; }
+    .extras-info { display:flex; gap:12px; align-items:center; flex:1; }
+    .extras-thumb { width:72px; height:56px; object-fit:cover; border-radius:8px; }
+    .qty-input { width:64px; padding:6px 8px; border-radius:8px; border:1px solid rgba(220,176,89,0.06); background:transparent; color:var(--text,#FFF7E7); }
+    .btn-inline { background:#DCB059; color:#490506; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
+    .btn-remove { background:transparent; color:#D74547; border:none; cursor:pointer; }
+    /* sidebar form */
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+      padding:10px; border-radius:8px; border:1px solid rgba(220,176,89,0.06); background:transparent; color:var(--text,#FFF7E7);
+      font-family:'Funnel Display',sans-serif;
+    }
+    textarea { min-height:80px; resize:vertical; }
+    .summary-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; font-family:'Merriweather',serif; font-weight:700; }
+    .place-order { width:100%; padding:12px 14px; border-radius:10px; border:none; background:#DCB059; color:#490506; font-weight:700; cursor:pointer; font-size:1rem; }
+    .muted { color: rgba(255,247,231,0.7); font-size:0.95rem; }
+    @media (max-width:920px) {
+      .cart-layout { flex-direction:column; }
+      .cart-sidebar { width:100%; order:2; }
+    }
+  </style>
+</head>
+<body style="background:#490506;">
+
+  <header class="top-header" style="position:static;">
+    <div class="header-left">
+      <a href="pageMain.html" style="color:#FFF7E7;text-decoration:none;font-weight:700;">← Home</a>
+    </div>
+    <div class="header-right" style="margin-left:auto">
+      <a href="admin.html" style="color:#FFF7E7;text-decoration:none;font-weight:700;">Admin</a>
+    </div>
+  </header>
+
+  <main class="cart-layout" role="main">
+    <section class="cart-main" aria-label="Cart items">
+      <div class="section-panel" id="sets-panel">
+        <h3 class="section-title">Selected Set</h3>
+        <div class="chosen-set" id="chosen-set">
+          <!-- populated by JS: thumbnail + dropdown -->
+        </div>
+        <p class="muted" style="margin-top:10px;">Change your set from the dropdown. Selecting a set updates the subtotal.</p>
+      </div>
+
+      <div class="section-panel" id="extras-panel">
+        <h3 class="section-title">Additional Products</h3>
+        <div id="extras-list" class="extras-list" aria-live="polite"></div>
+        <div id="extras-empty" class="muted" style="margin-top:8px;">No additional products added.</div>
+      </div>
+    </section>
+
+    <aside class="cart-sidebar" aria-label="Checkout">
+      <div class="section-panel">
+        <h3 class="section-title">Buyer Information</h3>
+        <form id="buyer-form" novalidate>
+          <div class="field">
+            <label for="fullname" class="muted">Full name *</label>
+            <input id="fullname" name="fullname" type="text" required>
+          </div>
+          <div class="field">
+            <label for="phone" class="muted">Phone *</label>
+            <input id="phone" name="phone" type="tel" required>
+          </div>
+          <div class="field">
+            <label for="email" class="muted">Email</label>
+            <input id="email" name="email" type="email">
+          </div>
+          <div class="field">
+            <label for="facebook" class="muted">Facebook link</label>
+            <input id="facebook" name="facebook" type="text" placeholder="https://facebook.com/...">
+          </div>
+          <div class="field">
+            <label for="address" class="muted">Address *</label>
+            <input id="address" name="address" type="text" required>
+          </div>
+          <div class="field">
+            <label for="city" class="muted">City / Municipality *</label>
+            <input id="city" name="city" type="text" required>
+          </div>
+          <div class="field">
+            <label for="postal" class="muted">Postal code *</label>
+            <input id="postal" name="postal" type="text" required>
+          </div>
+          <div class="field">
+            <label for="mode" class="muted">Mode of payment *</label>
+            <select id="mode" name="mode" required>
+              <option value="">Select payment</option>
+              <option value="cod">Cash on Delivery</option>
+              <option value="gcash">GCash</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="comments" class="muted">Additional comments</label>
+            <textarea id="comments" name="comments"></textarea>
+          </div>
+
+          <div style="margin-top:8px;border-top:1px solid rgba(220,176,89,0.06);padding-top:12px;">
+            <div class="summary-row">
+              <div class="muted">Subtotal</div>
+              <div id="subtotal">₱0</div>
+            </div>
+            <div class="summary-row">
+              <div class="muted">Shipping</div>
+              <div id="shipping">Calculated at checkout</div>
+            </div>
+            <div style="margin-top:8px" class="summary-row">
+              <div>Total</div>
+              <div id="total">₱0</div>
+            </div>
+            <button id="place-order" type="submit" class="place-order" style="margin-top:12px;">Place Order</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+  </main>
+
+<script>
+// filepath: /home/kyusi/Downloads/BeuPro/cart.html
+// Cart UI + behavior: sets dropdown, extras qty/remove, totals, order enqueue (FIFO), localStorage persistence.
+
+(function () {
+  const STORAGE_KEY = 'hc_cart_v1';
+  const ORDERS_KEY = 'orders_queue';
+
+  // Predefined sets & sample extras (adjust images/resources as needed)
+  const SETS = [
+    { id: 'set-c-1', name: 'Set-C (1 Set)', price: 885, img: 'Resources/set-c-1.png' },
+    { id: 'set-c-2', name: 'Set-C (2 Sets)', price: 1675, img: 'Resources/set-c-2.png' },
+    { id: 'set-c-3', name: 'Set-C (3 Sets)', price: 2470, img: 'Resources/set-c-3.png' }
+  ];
+
+  const SAMPLE_EXTRAS = [
+    { id: 'extra-1', name: 'Brightening Serum', price: 485, img: 'Resources/extra-brightening.png' },
+    { id: 'extra-2', name: 'Hydrating Toner', price: 375, img: 'Resources/extra-toner.png' },
+    { id: 'extra-3', name: 'Night Repair Cream', price: 525, img: 'Resources/extra-night.png' }
+  ];
+
+  // Elements
+  const chosenSetEl = document.getElementById('chosen-set');
+  const extrasListEl = document.getElementById('extras-list');
+  const extrasEmpty = document.getElementById('extras-empty');
+  const subtotalEl = document.getElementById('subtotal');
+  const totalEl = document.getElementById('total');
+  const buyerForm = document.getElementById('buyer-form');
+
+  // Storage helpers
+  function readCart() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; }
+    catch (e) { return { set: null, extras: [] }; }
+  }
+  function writeCart(cart) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    renderCart(); // keep UI in sync
+  }
+
+  // Orders queue (FIFO)
+  function readQueue() {
+    try { return JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function writeQueue(q) { localStorage.setItem(ORDERS_KEY, JSON.stringify(q)); }
+
+  // Render chosen set area (thumbnail + dropdown)
+  function renderSetPanel() {
+    const cart = readCart();
+    chosenSetEl.innerHTML = '';
+
+    // thumbnail (shows selected set or placeholder)
+    const thumb = document.createElement('img');
+    thumb.className = 'set-thumb';
+    thumb.alt = cart.set ? cart.set.name : 'No set selected';
+    thumb.src = cart.set ? (cart.set.img || findSet(cart.set.id).img) : (SETS[0].img || '');
+    chosenSetEl.appendChild(thumb);
+
+    // select + price block
+    const selectWrap = document.createElement('div');
+    selectWrap.className = 'set-select';
+
+    const select = document.createElement('select');
+    select.setAttribute('aria-label', 'Choose set');
+    SETS.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `${s.name} — ₱${s.price.toLocaleString()}`;
+      if (cart.set && cart.set.id === s.id) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', () => {
+      const selected = findSet(select.value);
+      const newCart = readCart();
+      newCart.set = { id: selected.id, name: selected.name, price: selected.price, img: selected.img };
+      writeCart(newCart);
+    });
+
+    const priceFlag = document.createElement('div');
+    priceFlag.className = 'price-flag';
+    const displayPrice = cart.set ? cart.set.price : (SETS[0].price);
+    priceFlag.textContent = `₱${displayPrice.toLocaleString()}`;
+
+    selectWrap.appendChild(select);
+    selectWrap.appendChild(priceFlag);
+    chosenSetEl.appendChild(selectWrap);
+  }
+
+  function findSet(id) {
+    return SETS.find(s => s.id === id) || SETS[0];
+  }
+
+  // Render extras list with qty controls and remove
+  function renderExtras() {
+    const cart = readCart();
+    extrasListEl.innerHTML = '';
+    const extras = cart.extras || [];
+
+    if (!extras.length) {
+      extrasEmpty.style.display = 'block';
+      return;
+    }
+    extrasEmpty.style.display = 'none';
+
+    extras.forEach((ex, idx) => {
+      const row = document.createElement('div');
+      row.className = 'extras-row';
+
+      const info = document.createElement('div');
+      info.className = 'extras-info';
+      const img = document.createElement('img');
+      img.className = 'extras-thumb';
+      img.src = ex.img || (findExtra(ex.id).img || '');
+      img.alt = ex.name;
+      const meta = document.createElement('div');
+      meta.style.flex = '1';
+      meta.innerHTML = `<div style="font-family:'Merriweather',serif;color:#DCB059;font-weight:700">${ex.name}</div>
+                        <div class="muted">₱${Number(ex.price).toLocaleString()}</div>`;
+
+      info.appendChild(img);
+      info.appendChild(meta);
+
+      const controls = document.createElement('div');
+      controls.style.display = 'flex';
+      controls.style.alignItems = 'center';
+      controls.style.gap = '8px';
+
+      const qty = document.createElement('input');
+      qty.type = 'number';
+      qty.min = '1';
+      qty.value = ex.qty || 1;
+      qty.className = 'qty-input';
+      qty.setAttribute('aria-label', `Quantity for ${ex.name}`);
+      qty.addEventListener('change', () => {
+        const v = Math.max(1, Number(qty.value) || 1);
+        qty.value = v;
+        const cart = readCart();
+        cart.extras[idx].qty = v;
+        writeCart(cart);
+      });
+
+      const remove = document.createElement('button');
+      remove.className = 'btn-remove';
+      remove.type = 'button';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => {
+        const c = readCart();
+        c.extras.splice(idx, 1);
+        writeCart(c);
+      });
+
+      controls.appendChild(qty);
+      controls.appendChild(remove);
+
+      row.appendChild(info);
+      row.appendChild(controls);
+      extrasListEl.appendChild(row);
+    });
+  }
+
+  function findExtra(id) {
+    return SAMPLE_EXTRAS.find(e => e.id === id) || { name: id, price: 0, img: '' };
+  }
+
+  // calculate totals (subtotal == sum set + extras)
+  function calcTotals() {
+    const cart = readCart();
+    let setTotal = cart.set ? Number(cart.set.price || 0) : 0;
+    let extrasTotal = 0;
+    (cart.extras || []).forEach(e => { extrasTotal += Number(e.price || 0) * (Number(e.qty || 1)); });
+    const subtotal = setTotal + extrasTotal;
+    subtotalEl.textContent = `₱${subtotal.toLocaleString()}`;
+    totalEl.textContent = `₱${subtotal.toLocaleString()}`; // no tax/shipping calculation here
+  }
+
+  // Render entire cart UI
+  function renderCart() {
+    renderSetPanel();
+    renderExtras();
+    calcTotals();
+  }
+
+  // Utilities: add an extra (used by other pages or for initialization)
+  function addExtraToCart(extraId, qty = 1) {
+    const ex = findExtra(extraId);
+    const cart = readCart();
+    cart.extras = cart.extras || [];
+    const existing = cart.extras.find(e => e.id === extraId);
+    if (existing) existing.qty = Number(existing.qty || 1) + qty;
+    else cart.extras.push({ id: ex.id, name: ex.name, price: ex.price, img: ex.img, qty });
+    writeCart(cart);
+  }
+
+  // Expose helpers for debugging
+  window.__hc_cart = { readCart, writeCart, addExtraToCart };
+
+  // Initialize some sample extras if none present (optional)
+  (function maybeSeedExtras() {
+    const cart = readCart();
+    if (!cart.extras || cart.extras.length === 0) {
+      // don't auto-add by default; if you want prefilled demo uncomment:
+      // addExtraToCart('extra-1', 1);
+    }
+  })();
+
+  // Form submit -> enqueue order (FIFO)
+  buyerForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    const form = evt.target;
+    // simple validation for required fields
+    if (!form.fullname.value.trim() || !form.phone.value.trim() || !form.address.value.trim() || !form.city.value.trim() || !form.postal.value.trim() || !form.mode.value) {
+      alert('Please fill all required fields marked with *.');
+      return;
+    }
+
+    const cart = readCart();
+    if (!cart.set) { alert('Please choose a set before placing order.'); return; }
+
+    // build order object
+    const order = {
+      id: 'ORD-' + Date.now(),
+      cart,
+      buyer: {
+        fullname: form.fullname.value.trim(),
+        phone: form.phone.value.trim(),
+        email: form.email.value.trim(),
+        facebook: form.facebook.value.trim(),
+        address: form.address.value.trim(),
+        city: form.city.value.trim(),
+        postal: form.postal.value.trim(),
+        mode: form.mode.value,
+        comments: form.comments.value.trim()
+      },
+      createdAt: new Date().toISOString(),
+      status: 'queued'
+    };
+
+    // enqueue (FIFO: push at end)
+    const q = readQueue();
+    q.push(order);
+    writeQueue(q);
+
+    // clear cart and UI
+    localStorage.removeItem(STORAGE_KEY);
+    renderCart();
+
+    alert('Order queued. Admin will confirm and contact you.');
+    // optional: redirect to home or orders page
+    // window.location.href = 'pageMain.html';
+  });
+
+  // initial render on load
+  document.addEventListener('DOMContentLoaded', renderCart);
+})();
+</script>
+</body>
+</html>
