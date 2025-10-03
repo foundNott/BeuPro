@@ -239,7 +239,7 @@ tasks:
 7. admin html: build a comment section management
 
 
-instructions: 
+instructions:
 
 Your input should be a teh whole particular codeblocks that are updated for changes instead of individual lines
 example of codeblock: /* ===================[ Product Carousel Styles ]=================== */
