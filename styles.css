@@ -245,6 +245,12 @@ button, select, input, textarea { color: var(--text-white); }
   flex-wrap: nowrap;
 }
 
+/* Ensure carousel doesn't overlap hero CTA and give spacing per FSD */
+.product-carousel-section { margin-top: 32px; }
+
+/* Make hero CTA sit above other elements */
+.hero-cta { position: relative; z-index: 40; }
+
 /* Left sticky info column */
 .carousel-left {
   order: 1;                    
@@ -579,6 +585,13 @@ button, select, input, textarea { color: var(--text-white); }
   outline: 3px solid rgba(220,176,89,0.12);
 }
 
+/* Increase product card size by ~15% on wider screens per FSD */
+@media (min-width: 1000px) {
+  .product-grid { gap: 22px; }
+  /* Use a variable so other transforms can preserve the scale value */
+  .product-grid .product-card { --pc-scale: 1.15; transform: scale(var(--pc-scale)); }
+}
+
 /* reduce gaps for tighter image grid */
 .product-selection-inner .product-grid {
   gap: 16px;
@@ -593,15 +606,20 @@ button, select, input, textarea { color: var(--text-white); }
 .card-price { font-size: 0.95rem; color: #FFF7E7; margin-top: 6px; }
 .card-price .muted { color: rgba(255,247,231,0.7); font-size: 0.85rem; display:block; margin-top:2px; }
 
-.product-card:focus,
-.product-card:hover {
-  transform: translateY(-6px);
+.product-card.set-card:focus,
+.product-card.set-card:hover {
+  /* Only sets should lift on hover/focus; preserve the large-screen scale when present */
+  transform: translateY(-6px) scale(var(--pc-scale,1));
   outline: 2px solid rgba(220,176,89,0.06); /* subtle emphasis using gold tint */
 }
 
 .product-card.selected {
   outline: 3px solid rgba(220,176,89,0.12);
 }
+
+/* Ensure selected cards keep the intended lift/scale. Extras should not translate up — only get the outline/scale */
+.product-card.selected { transform: translateY(-6px) scale(var(--pc-scale,1)); }
+.product-card.extra-card.selected { /* extras only scale; do not translate */ transform: scale(var(--pc-scale,1)); }
 
 .product-card.extra-card .extra-badge {
   font-family: 'Funnel Display', sans-serif;
@@ -649,6 +667,30 @@ button, select, input, textarea { color: var(--text-white); }
   border-radius: 12px;
   padding: 28px;
 }
+
+/* About two-column grid */
+.about-inner-grid { display:grid; grid-template-columns: 40% 1fr; gap:20px; align-items:center; max-width:1100px; margin:0 auto; }
+.about-block {
+  background-image: url('Resources/about.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 48px 0;
+  margin: 24px 0;
+  position: relative;
+}
+.about-block::before {
+  /* subtle dark overlay for text readability */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(10,6,6,0.36), rgba(10,6,6,0.2));
+  z-index: 0;
+}
+.about-inner-grid { position: relative; z-index: 2; }
+.about-media-col { border-radius:12px; min-height:220px; position:relative; overflow:hidden; }
+.about-media-col::after { content:''; position:absolute; inset:0; border-radius:12px; background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.12)); }
+.about-content-col { max-width:640px; position:relative; z-index:2; }
 
 /* media and text inside about */
 .about-media img {
@@ -810,6 +852,73 @@ button, select, input, textarea { color: var(--text-white); }
     .carousel-item, .carousel-btn { transition: none !important; }
   }
 }
+
+/* Add-to-cart overlay for extra cards */
+.product-card .add-overlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 18px;
+  background: rgba(76,14,14,0.9);
+  color: #FFF7E7;
+  padding: 8px 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+  font-family: 'Funnel Display', sans-serif;
+  opacity: 0;
+  transform: translateY(8px) scale(1);
+  transition: opacity .18s ease, transform .18s cubic-bezier(.2,.9,.3,1);
+  pointer-events: none;
+}
+.product-card.extra-card:hover .add-overlay,
+.product-card.extra-card:focus .add-overlay,
+.product-card.extra-card.selected .add-overlay {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Avoid moving the extra card itself on hover/focus — overlay appears on top via absolute positioning */
+.product-card.extra-card:hover,
+.product-card.extra-card:focus {
+  transform: scale(var(--pc-scale,1));
+}
+
+/* Promotions carousel */
+.promotions-block { padding: 28px 16px; background: transparent; max-width: 1100px; margin: 24px auto; }
+.promos-carousel { display:flex; align-items:center; gap:12px; }
+.promos-track { display:flex; gap:12px; overflow:hidden; flex:1 1 auto; }
+.promo-item { min-width: 280px; border-radius:12px; overflow:hidden; background:#fff; color:#000; box-shadow:0 8px 18px rgba(0,0,0,0.08); }
+.promo-item img { width:100%; height:160px; object-fit:cover; display:block; }
+.promo-caption { padding:10px; font-weight:700; }
+.promo-prev, .promo-next { background:#6C0002; color: #FFF7E7; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+
+/* Comments block */
+.comments-block { max-width: 900px; margin: 18px auto 60px; padding: 18px; background: rgba(255,255,255,0.02); border-radius:12px; }
+.comments-list { display:flex; flex-direction:column; gap:12px; margin-bottom:12px; }
+.comment-item { background: #FFF7E7; color:#6C0002; padding:12px; border-radius:8px; box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+.comment-form { display:flex; flex-direction:column; gap:8px; }
+.comment-form input, .comment-form textarea { padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); }
+.comment-form .btn { background:#6C0002; color:#FFF7E7; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+
+/* Undo toast (small LIFO undo control) */
+#undo-toast { position: fixed; right: 20px; bottom: 20px; background: rgba(44,8,8,0.95); color: #FFF7E7; padding: 10px 12px; border-radius: 10px; display: none; align-items: center; gap:8px; z-index: 2000; box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+#undo-toast.show { display:flex; }
+#undo-toast button { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #FFF7E7; padding:6px 10px; border-radius:8px; cursor:pointer; }
+
+/* FAQ accordion */
+.faq-list { display:flex; flex-direction:column; gap:8px; }
+.faq-item { border-radius:10px; overflow:hidden; border:1px solid rgba(0,0,0,0.06); background: #FFF7E7; }
+.faq-q { width:100%; text-align:left; padding:12px 16px; background:transparent; border:none; font-weight:700; cursor:pointer; font-family:'Funnel Display',sans-serif; }
+.faq-q[aria-expanded="true"] { border-bottom: 1px solid rgba(0,0,0,0.04); }
+.faq-a { padding:12px 16px; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity:1; transform: none; } }
+
+/* Active nav link styling (gold underline) */
+.header-middle a.active { position: relative; color: #6C0002; }
+.header-middle a.active::after { content: ''; position: absolute; left:0; right:0; bottom:-6px; height:4px; background: linear-gradient(90deg,#F0B135,#DCB059); border-radius:4px; }
+
 
 #undo-toast {
   position: fixed;

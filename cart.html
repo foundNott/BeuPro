@@ -195,8 +195,12 @@
       { id: 'set-c-3', name: 'Set-C (3 Sets)', price: 2470, note: '25% OFF + FREE SHIPPING!' }
     ];
 
+    /* === Extras catalog (images referenced in Resources/) === */
     const EXTRAS = [
-      { id: 'ibb-soap', name: 'IBB Soap (1 Bar)', price: 148, note: '15% OFF!' , img:'Resources/Product Section.png'},
+      { id: 'extra-1', name: 'Brightening Serum', price: 485, note: 'Best seller', img:'Resources/extra-brightening.png'},
+      { id: 'extra-2', name: 'Hydrating Toner', price: 375, note: 'Hydration boost', img:'Resources/extra-toner.png'},
+      // legacy placeholders (fall back to product section image if missing)
+      { id: 'ibb-soap', name: 'IBB Soap (1 Bar)', price: 148, note: '15% OFF!', img:'Resources/Product Section.png'},
       { id: 'sunshield', name: 'Sunshield SPF50 (1 Bottle)', price: 288, note: '15% OFF!', img:'Resources/Product Section.png'}
     ];
 
@@ -204,7 +208,8 @@
     const CART_KEY = 'hc_cart_v1'; // main cart state
     const STACK_KEY = 'hc_cart_stack_v1'; // LIFO action stack
 
-    function readCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || { set:null, extras: [] }; } catch(e){ return { set:null, extras: [] }; } }
+  /* === Storage helpers === */
+  function readCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || { set:null, extras: [] }; } catch(e){ return { set:null, extras: [] }; } }
     function writeCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); renderCart(); }
 
     // LIFO stack actions (pushCart, undoCart, listCart)
@@ -252,7 +257,8 @@
     function formatPHPeso(n){ return '₱' + Number(n).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 
     // populate sets
-    function initSets(){
+  /* === UI: Sets dropdown === */
+  function initSets(){
       setSelect.innerHTML = '';
       SETS.forEach(s=>{
         const opt = document.createElement('option'); opt.value = s.id; opt.textContent = `${s.name} - ${formatPHPeso(s.price)}`; setSelect.appendChild(opt);
@@ -268,7 +274,8 @@
     }
 
     // populate extras
-    function renderExtras(){
+  /* === UI: Extras list rendering === */
+  function renderExtras(){
       extrasListEl.innerHTML = '';
       EXTRAS.forEach(ex=>{
         const item = document.createElement('div'); item.className='extra-item'; item.dataset.id = ex.id;
@@ -319,7 +326,8 @@
       });
     }
 
-    function renderCart(){
+  /* === Render cart state (reads hc_cart_v1) === */
+  function renderCart(){
       const cart = readCart();
       // set selection
       if (cart.set) { setSelect.value = cart.set.id; const s = SETS.find(x=>x.id===cart.set.id); setNote.textContent = s ? s.note : ''; selectedPriceEl.textContent = formatPHPeso(cart.set.price); }
@@ -350,6 +358,14 @@
       sidebarBottom.textContent = formatPHPeso(total);
       document.getElementById('sidebar-total-bottom-amount').textContent = formatPHPeso(total);
     }
+
+    // React to cart changes made on other pages (storage event) so pageMain/cart stay in sync
+    window.addEventListener('storage', (e)=>{
+      if (e.key === CART_KEY || e.key === null) { // null can mean clear
+        // re-render from storage
+        renderCart();
+      }
+    });
 
     // Undo bar
     const undoBar = document.getElementById('undo-bar');

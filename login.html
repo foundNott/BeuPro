@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Sign In — Her Choice PH</title>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Funnel+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="exstyles.css">
+  <script src="/public/js/supabase-config.js"></script>
+  <script type="module" src="/public/js/login.js"></script>
+</head>
+
+<body class="admin">
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px">
+    <div style="width:400px;max-width:95%;background:var(--panel);padding:24px;border-radius:12px">
+      <h1 style="font-family:'Funnel Display',serif;margin:0 0 8px 0;color:var(--bg)">Sign in</h1>
+      <p style="color:var(--muted);margin:0 0 12px 0">Sign in with your admin account to access the dashboard.</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="email" type="email" placeholder="Email" style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--bg)">
+        <input id="password" type="password" placeholder="Password" style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <button id="sign-in" class="btn">Sign in</button>
+          <a href="pageMain.html" style="color:var(--muted);text-decoration:none">Back to site</a>
+        </div>
+      </div>
+      <div id="login-msg" style="margin-top:12px;color:var(--muted)"></div>
+    </div>
+  </main>
+</body>
+</html>

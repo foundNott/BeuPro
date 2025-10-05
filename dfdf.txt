@@ -211,7 +211,7 @@ never use shadows in design
 Data structure
 LIFO
 add-to-cart (pushCart, undoCart, listCart)
-Track Recent Promotions
+Track Recent Promotions (pushPromo, popPromo, listPromo)
 List latest Comment (pushComment, hideComment, listComments)
 
 FIFO
@@ -228,15 +228,6 @@ Set-C (3 Sets) - ₱2,470 25% OFF + FREE SHIPPING!
 bonus products
 IBB Soap (1 Bar) - ₱148.00 15% OFF!
 Sunshield SPF50 (1 Bottle) - ₱288.00 15% OFF!
-
-tasks:
-1. cart.html: make an cart form with proper Display and add-to-cart function
-2. admin html: create a basic admin dashboard with proper sidebar
-3. admin html: create a customer order queue with enqCustomer, deqCustomer
-4. admin html: design a delivery schedule with enqDelivery, deqDelivery
-5. admin html: build a courier management system with enqueueCourier, dequeueCourier
-6. pageMain.html: implement a comment section with pushComment, hideComment, listComments
-7. admin html: build a comment section management
 
 
 instructions:

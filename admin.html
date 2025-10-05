@@ -46,6 +46,7 @@
         <a href="#deliveries" data-target="deliveries-page">Deliveries</a>
         <a href="#couriers" data-target="couriers-page">Couriers</a>
         <a href="#comments" data-target="comments-page">Comments</a>
+        <a href="#promos" data-target="promos-page">Promotions</a>
       </nav>
     </aside>
 
@@ -98,6 +99,24 @@
           <h2>Comments</h2>
           <div class="muted small">Comment moderation will be implemented here.</div>
           <div id="comments-list" class="list"></div>
+        </section>
+      </div>
+
+      <div id="promos-page" class="admin-page">
+        <section class="panel">
+          <h2>Promotions</h2>
+          <div class="muted small">Add promotion links (no images required). These will be shown in the site promotions area.</div>
+          <div class="controls" style="margin-top:8px">
+            <input id="promo-title" placeholder="Promotion title" class="input small">
+            <input id="promo-link" placeholder="https://..." class="input small">
+            <button id="promo-add" class="btn">Add Promotion</button>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <input id="promo-id" placeholder="Promotion id to remove" class="input small">
+            <button id="promo-remove" class="btn secondary">Remove</button>
+          </div>
+          <div class="muted small">Existing promotions</div>
+          <div id="promo-list" class="list" style="margin-top:12px"></div>
         </section>
       </div>
 

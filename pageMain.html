@@ -20,9 +20,9 @@
     </div>
 
     <nav class="header-middle">
-      <a href="#product-selection-section">Shop</a>
-      <a href="#about-brand">About</a>
-      <a href="#footer">Contact</a>
+        <a href="#product-selection-section" data-target="product-selection-section">Shop</a>
+        <a href="#about-section" data-target="about-section">About</a>
+        <a href="#footer" data-target="footer">Contact</a>
       <img src="logo-large.png" alt="Logo" class="logo">
     </nav>
 
@@ -74,7 +74,7 @@
   </section>
 
 <!-- Product Selection (uses Resources/Product Selection.png as section bg) -->
-  <section class="product-selection-section" aria-label="Product selection">
+  <section id="product-selection-section" class="product-selection-section" aria-label="Product selection">
     <div class="product-selection-inner">
       <div class="product-grid" role="list">
         <!-- Sets (single-select) -->
@@ -102,13 +102,14 @@
           </div>
         </button>
 
-        <!-- Extras now individual selectable cards (multi-select) -->
+  <!-- Extras now individual selectable cards (multi-select) -->
         <button class="product-card extra-card" data-type="extra" data-id="extra-1" data-name="Brightening Serum" data-price="485" aria-pressed="false">
           <img src="Resources/extra-brightening.png" alt="Brightening Serum">
           <div class="card-label">
             <div class="card-title">Brightening Serum</div>
             <div class="card-price">₱485</div>
           </div>
+          <div class="add-overlay" role="button" tabindex="0" aria-label="Add Brightening Serum to cart">Add to cart</div>
         </button>
 
         <button class="product-card extra-card" data-type="extra" data-id="extra-2" data-name="Hydrating Toner" data-price="375" aria-pressed="false">
@@ -117,91 +118,94 @@
             <div class="card-title">Hydrating Toner</div>
             <div class="card-price">₱375</div>
           </div>
+          <div class="add-overlay" role="button" tabindex="0" aria-label="Add Hydrating Toner to cart">Add to cart</div>
         </button>
       </div>
     </div>
   </section>
-
-<!-- Combined About + Customer Reviews (moved About inside Reviews section) -->
-<section class="customer-reviews-section" aria-label="Customer reviews">
-  <div class="combined-inner">
-    <!-- About Brand (moved here) -->
-    <div class="about-inner">
-      <div class="about-media">
-        <img src="Resources/about-image.png" alt="About Her Choice PH">
-      </div>
-      <div class="about-text">
+<!-- About → Promotions → Comments (reordered and simplified) -->
+<section id="about-section" class="about-promos-comments" aria-label="About and promotions">
+  <div class="about-block">
+    <div class="about-inner-grid">
+      <div class="about-media-col" aria-hidden="true"></div>
+      <div class="about-content-col">
         <h2>About Her Choice PH</h2>
-        <p>
-          Built on trust, heritage and visible results. Her Choice PH combines modern formulation with classic sensibilities to deliver skincare that feels luxurious and works.
-        </p>
-        <p>
-          Our mission is to empower Filipinas with simple, effective products made for everyday beauty.
-        </p>
+        <p>Built on trust, heritage and visible results. Her Choice PH combines modern formulation with classic sensibilities to deliver skincare that feels luxurious and works.</p>
+        <p>Our mission is to empower Filipinas with simple, effective products made for everyday beauty.</p>
         <a class="primary-cta" href="/about">Learn more</a>
       </div>
     </div>
+  </div>
 
-    <!-- Customer Reviews -->
-    <div class="reviews-inner">
-      <h2 class="section-title">Customer Reviews</h2>
-      <div class="reviews-grid">
-        <!-- 12 items (4 rows × 3 columns) -->
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review1.png" alt=""></div>
-          <div class="review-text"><p>“I saw results in 2 weeks.” — Maria</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review2.png" alt=""></div>
-          <div class="review-text"><p>“My skin feels renewed.” — Ana</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review3.png" alt=""></div>
-          <div class="review-text"><p>“Gentle and effective.” — Joy</p></div>
-        </div>
+  <div class="promotions-block">
+    <h2>Promotions</h2>
+    <div class="promos-carousel">
+      <button class="promo-prev">‹</button>
+      <div class="promos-track">
+        <div class="promo-item"><img src="Resources/Promo1.png" alt="Promo 1"><div class="promo-caption">Buy 2 Get 10% Off</div></div>
+        <div class="promo-item"><img src="Resources/Promo2.png" alt="Promo 2"><div class="promo-caption">Free shipping ₱1500+</div></div>
+        <div class="promo-item"><img src="Resources/Promo3.png" alt="Promo 3"><div class="promo-caption">Limited bundle</div></div>
+      </div>
+      <button class="promo-next">›</button>
+    </div>
+  </div>
 
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review4.png" alt=""></div>
-          <div class="review-text"><p>“Love the glow.” — Ella</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review5.png" alt=""></div>
-          <div class="review-text"><p>“No irritation.” — Carla</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review6.png" alt=""></div>
-          <div class="review-text"><p>“Packaging is beautiful.” — Lina</p></div>
-        </div>
+  <div class="comments-block">
+    <h2>Comments</h2>
+    <div id="comments-list" class="comments-list">
+      <!-- comments injected by JS -->
+    </div>
+    <div class="comment-form">
+      <input id="comment-author" placeholder="Your name">
+      <textarea id="comment-body" placeholder="Write a comment"></textarea>
+      <button id="comment-submit" class="btn">Post Comment</button>
+    </div>
+  </div>
+</section>
 
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review7.png" alt=""></div>
-          <div class="review-text"><p>“My skin looks brighter.” — May</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review8.png" alt=""></div>
-          <div class="review-text"><p>“Feels premium.” — Tess</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review9.png" alt=""></div>
-          <div class="review-text"><p>“Quick results.” — June</p></div>
-        </div>
-
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review10.png" alt=""></div>
-          <div class="review-text"><p>“Highly recommend.” — Ria</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review11.png" alt=""></div>
-          <div class="review-text"><p>“Soft texture.” — Bea</p></div>
-        </div>
-        <div class="review-item">
-          <div class="review-media"><img src="Resources/review12.png" alt=""></div>
-          <div class="review-text"><p>“Results in 30 days.” — Joy</p></div>
-        </div>
+<!-- FAQ Accordion -->
+<section id="faq" class="faq-section" aria-label="Frequently Asked Questions">
+  <div class="faq-inner" style="max-width:900px;margin:36px auto;padding:18px">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Gaano kabilis bago makita ang effect?</button>
+        <div class="faq-a" hidden>Karaniwang 1–2 shades na difference matapos ang 4 weeks ng consistent use. Varies by user—some see a difference after days; some may take up to 5 weeks.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Malagkit ba ang lotion?</button>
+        <div class="faq-a" hidden>Hindi. Lightweight at non-greasy ang formula, madaling ma-absorb at ideal sa mainit na klima.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Safe ba ito sa sensitive skin?</button>
+        <div class="faq-a" hidden>Yes—formulated for all skin types. If pregnant, consult a doctor first.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Pwede ba itong gamitin araw-araw?</button>
+        <div class="faq-a" hidden>Oo. Daily use ng Kojic Papaya Soap, Sunflower Oil, at Whitening Lotion ang recommended.</div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Footer -->
+<footer id="footer" class="site-footer" style="background:#F7EFE6;padding:24px 12px;margin-top:32px">
+  <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+    <div style="min-width:240px">
+      <h3>Contact</h3>
+      <div><a href="tel:+63-000-000-0000">+63-000-000-0000</a></div>
+      <div><a href="mailto:support@herchoice.ph">support@herchoice.ph</a></div>
+    </div>
+    <div style="min-width:240px">
+      <h3>Social</h3>
+      <div><a href="#" target="_blank" rel="noopener">Facebook</a> • <a href="#" target="_blank" rel="noopener">TikTok Shop</a> • <a href="#" target="_blank" rel="noopener">Shopee</a></div>
+    </div>
+    <div style="min-width:200px;text-align:right">
+      <div>© <span id="cur-year"></span> Her Choice PH</div>
+      <div><a href="#">Privacy</a> • <a href="#">Terms</a></div>
+    </div>
+  </div>
+</footer>
 
   <!-- undo toast -->
   <div id="undo-toast" role="status" aria-live="polite">
@@ -212,15 +216,89 @@
 
 
   <script>
-    // Sticky header background toggle (optional, can be removed since header is always #490506)
+    /* ===================[ Header behavior ]=================== */
+    // Sticky header background toggle
     const header = document.querySelector('.top-header');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 10) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
+      if (window.scrollY > 10) header.classList.add('scrolled'); else header.classList.remove('scrolled');
     });
+  </script>
+  <script src="/public/js/promos.js"></script>
+  <script src="/public/js/cart-sync.js"></script>
+  <script>
+  /* ===================[ Cart LIFO helpers + Undo toast ]=================== */
+  (function(){
+    const STORAGE_KEY = 'hc_cart_v1';
+    const UNDO_TIMEOUT = 6000; // ms
+    let undoTimer = null;
+    let lastPushed = null;
+
+    function readCart(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; } catch(e){ return { set: null, extras: [] }; } }
+    function writeCart(cart){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); window.dispatchEvent(new Event('storage')); } catch(e){} }
+
+    // push an item onto the extras stack (LIFO)
+    function pushCart(item){ const cart = readCart(); cart.extras = cart.extras || []; cart.extras.push(item); writeCart(cart); showUndoToast(item); lastPushed = item; }
+    function undoCart(){ const cart = readCart(); if (!cart.extras || cart.extras.length===0) return; const popped = cart.extras.pop(); writeCart(cart); hideUndoToast(); return popped; }
+    function listCart(){ return readCart(); }
+
+    // Undo toast UI
+    const undoToast = document.getElementById('undo-toast');
+    const undoMsg = document.getElementById('undo-msg');
+    const undoBtn = document.getElementById('undo-btn');
+    const undoClose = document.getElementById('undo-close');
+
+    function showUndoToast(item){ if (!undoToast) return; undoMsg.textContent = `Added ${item.name}`; undoToast.classList.add('show'); if (undoTimer) clearTimeout(undoTimer); undoTimer = setTimeout(()=>{ hideUndoToast(); }, UNDO_TIMEOUT); }
+    function hideUndoToast(){ if (!undoToast) return; undoToast.classList.remove('show'); if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } }
+
+    if (undoBtn) undoBtn.addEventListener('click', ()=>{ const popped = undoCart(); if (popped) {
+      // reflect selection UI
+      const el = document.querySelector(`.product-card.extra-card[data-id="${popped.id}"]`);
+      if (el) { el.classList.remove('selected'); el.setAttribute('aria-pressed','false'); }
+    }});
+    if (undoClose) undoClose.addEventListener('click', ()=> hideUndoToast());
+
+    // expose
+    window.pushCart = pushCart;
+    window.undoCart = undoCart;
+    window.listCart = listCart;
+
+    // wire add-overlay click handlers on extras
+    function wireOverlays(){ document.querySelectorAll('.product-card.extra-card .add-overlay').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{ e.stopPropagation(); const card = btn.closest('.product-card'); if (!card) return; const item = { id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price) }; // push LIFO
+        pushCart(item); // toggle selected UI
+        card.classList.add('selected'); card.setAttribute('aria-pressed','true');
+      });
+      // allow keyboard Enter/Space
+      btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter' || e.key===' ') { e.preventDefault(); btn.click(); } });
+    }); }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireOverlays); else wireOverlays();
+
+  /* ===================[ Comments (local fallback) ]=================== */
+  // simple local storage backed list until Supabase hookup
+    const COMMENTS_KEY = 'hc_comments_v1';
+    function readComments(){ try { return JSON.parse(localStorage.getItem(COMMENTS_KEY)) || []; } catch(e){ return []; } }
+    function writeComments(list){ try { localStorage.setItem(COMMENTS_KEY, JSON.stringify(list)); } catch(e){} }
+    function renderComments(){ const target = document.getElementById('comments-list'); if (!target) return; target.innerHTML = ''; const list = readComments(); if (!list.length) { target.innerHTML = '<div class="comment-item">No comments yet — be the first!</div>'; return; } list.slice().reverse().forEach(c=>{ const d = document.createElement('div'); d.className='comment-item'; d.innerHTML = `<strong>${escapeHtml(c.author||'Guest')}</strong><div>${escapeHtml(c.body)}</div>`; target.appendChild(d); }); }
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    const commentSubmit = document.getElementById('comment-submit'); if (commentSubmit) commentSubmit.addEventListener('click', async ()=>{ const author = document.getElementById('comment-author').value || 'Guest'; const body = document.getElementById('comment-body').value || ''; if (!body.trim()) return; // attempt Supabase-backed pushComment if available
+      if (typeof window.pushComment === 'function'){
+        const ok = await window.pushComment({ name: author.trim(), email: '', body: body.trim() }).catch(()=>false);
+        if (ok) { renderComments(); document.getElementById('comment-body').value=''; // optionally show toast
+          if (window.toast) window.toast('Comment submitted — pending approval'); return; }
+      }
+      // fallback to local storage
+      const list = readComments(); list.push({ author: author.trim(), body: body.trim(), created: Date.now() }); writeComments(list); document.getElementById('comment-body').value=''; renderComments();
+    });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderComments); else renderComments();
+
+  /* ===================[ Promotions carousel controls ]=================== */
+  // small promos carousel controls
+    function wirePromos(){ const track = document.querySelector('.promos-track'); const prev = document.querySelector('.promo-prev'); const next = document.querySelector('.promo-next'); if (!track) return; let idx=0; const items = Array.from(track.children); function render(){ track.style.transform = `translateX(${-idx*(items[0].clientWidth+12)}px)`; }
+      if (prev) prev.addEventListener('click', ()=>{ if (idx>0) idx--; render(); }); if (next) next.addEventListener('click', ()=>{ if (idx < items.length-1) idx++; render(); }); window.addEventListener('resize', render); render(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wirePromos); else wirePromos();
+
+  })();
   </script>
 // ...existing code...
 <script>
@@ -321,11 +399,13 @@
   // ...existing code...
   (function(){
     const STORAGE_KEY = 'hc_cart_v1';
+    const MAX_EXTRAS = 2; // per FSD
+    function showToast(msg){ if (window.toast) window.toast(msg); else alert(msg); }
 
     function readCart(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; } catch(e){ return { set: null, extras: [] }; } }
     function writeCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
 
-    // set selection (radio-like)
+    // set selection (radio-like) — exactly one set
     document.querySelectorAll('.product-card.set-card').forEach(btn=>{
       btn.addEventListener('click', ()=> {
         const cart = readCart();
@@ -337,9 +417,9 @@
       });
     });
 
-    // extras selection (toggle)
+    // extras selection (toggle) — up to MAX_EXTRAS allowed
     document.querySelectorAll('.product-card.extra-card').forEach(btn=>{
-      btn.addEventListener('click', ()=> {
+      btn.addEventListener('click', (e)=>{
         const cart = readCart();
         const id = btn.dataset.id;
         const existing = cart.extras.find(e=>e.id===id);
@@ -348,6 +428,7 @@
           btn.classList.remove('selected');
           btn.setAttribute('aria-pressed','false');
         } else {
+          if ((cart.extras||[]).length >= MAX_EXTRAS){ showToast('You can add up to '+MAX_EXTRAS+' extras only'); return; }
           cart.extras.push({ id, name: btn.dataset.name, price: Number(btn.dataset.price) });
           btn.classList.add('selected');
           btn.setAttribute('aria-pressed','true');
@@ -367,7 +448,47 @@
         const el = document.querySelector(`.product-card.extra-card[data-id="${e.id}"]`);
         if (el) { el.classList.add('selected'); el.setAttribute('aria-pressed','true'); }
       });
+      // setup smooth scrolling and active nav
+      setupSmoothNav();
+      setupFAQ();
+      // set current year in footer
+      const y = new Date().getFullYear(); const yr = document.getElementById('cur-year'); if (yr) yr.textContent = y;
     });
+
+    /* ===== Navigation: smooth scroll + active link highlighting ===== */
+    function setupSmoothNav(){
+      const navLinks = Array.from(document.querySelectorAll('.header-middle a[data-target]'));
+      function onScroll(){
+        const fromTop = window.scrollY + 120; // offset for sticky header
+        navLinks.forEach(link=>{
+          const targetId = link.getAttribute('data-target');
+          const el = document.getElementById(targetId);
+          if (!el) return;
+          const top = el.offsetTop;
+          const bottom = top + el.offsetHeight;
+          if (fromTop >= top && fromTop < bottom) link.classList.add('active'); else link.classList.remove('active');
+        });
+      }
+      navLinks.forEach(link=>{
+        link.addEventListener('click', (e)=>{
+          e.preventDefault(); const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; el.scrollIntoView({behavior:'smooth',block:'start'});
+        });
+      });
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    /* ===== FAQ accordion ===== */
+    function setupFAQ(){
+      document.querySelectorAll('.faq-item').forEach(item=>{
+        const btn = item.querySelector('.faq-q'); const panel = item.querySelector('.faq-a');
+        btn.addEventListener('click', ()=>{
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!expanded));
+          if (expanded){ panel.hidden = true; } else { panel.hidden = false; }
+        });
+      });
+    }
   })();
   </script>
 
