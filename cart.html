@@ -158,8 +158,8 @@
           <div class="form-field"><label>Facebook</label><input id="facebook" name="facebook" placeholder="facebook.com/yourprofile"></div>
           <div class="form-field"><label>Address*</label><input id="address" name="address" required placeholder="Street, Barangay"></div>
           <div style="display:grid;grid-template-columns:1fr 120px;gap:8px">
-            <div class="form-field"><label>City</label><input id="city" name="city" placeholder="City/Town"></div>
-            <div class="form-field"><label>Postal Code</label><input id="postal" name="postal" placeholder="1000"></div>
+            <div class="form-field"><label>City*</label><input id="city" name="city" required placeholder="City/Town"></div>
+            <div class="form-field"><label>Postal Code*</label><input id="postal" name="postal" required placeholder="1000"></div>
           </div>
           <div class="form-field"><label>Mode of payment*</label>
             <select id="payment-mode" name="payment" required>
@@ -197,11 +197,8 @@
 
     /* === Extras catalog (images referenced in Resources/) === */
     const EXTRAS = [
-      { id: 'extra-1', name: 'Brightening Serum', price: 485, note: 'Best seller', img:'Resources/extra-brightening.png'},
-      { id: 'extra-2', name: 'Hydrating Toner', price: 375, note: 'Hydration boost', img:'Resources/extra-toner.png'},
-      // legacy placeholders (fall back to product section image if missing)
-      { id: 'ibb-soap', name: 'IBB Soap (1 Bar)', price: 148, note: '15% OFF!', img:'Resources/Product Section.png'},
-      { id: 'sunshield', name: 'Sunshield SPF50 (1 Bottle)', price: 288, note: '15% OFF!', img:'Resources/Product Section.png'}
+      { id: 'extra-1', name: 'IBB Soap (1 Bar)', price: 148, note: '15% OFF!', img:'Resources/Product Section.png'},
+      { id: 'extra-2', name: 'Sunshield SPF50 (1 Bottle)', price: 288, note: '15% OFF!', img:'Resources/Product Section.png'}
     ];
 
     // storage keys
@@ -314,7 +311,7 @@
             }
           } else {
             if (existing) { const prevQty = existing.qty || 1; existing.qty = q; writeCart(cart); pushCart({ type:'update_qty', payload:{ id:ex.id, prevQty } }); }
-            else { cart.extras.push({ id:ex.id, name:ex.name, price:ex.price, qty:q }); writeCart(cart); pushCart({ type:'add_extra', payload:{ id:ex.id, qty:q } }); }
+            else { const newItem = { id:ex.id, name:ex.name, price:ex.price, qty:q }; cart.extras.push(newItem); writeCart(cart); pushCart({ type:'add_extra', payload:{ id:ex.id, qty:q } }); if (window.persistCartItem) window.persistCartItem(newItem); }
           }
         }
 
@@ -397,7 +394,19 @@
 
       try{
         const resp = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-        if (!resp.ok){ const err = await resp.json().catch(()=>({error:resp.statusText})); throw new Error(err.error || err || 'Request failed'); }
+        if (!resp.ok){
+          // Try to parse response error and fallback to Supabase push if server refuses
+          const errBody = await resp.json().catch(()=>({ error: resp.statusText }));
+          const status = resp.status;
+          if ((status === 405 || status === 404 || status === 501) && typeof window.pushOrder === 'function'){
+            // fallback to Supabase client if available
+            const ok = await window.pushOrder(payload).catch(()=>false);
+            if (ok) {
+              localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY); renderCart(); if (window.toast) window.toast('Order saved (fallback) — thank you!'); else alert('Order saved — thank you!'); return;
+            }
+          }
+          throw new Error(errBody.error || errBody || 'Request failed');
+        }
         const data = await resp.json();
         // clear cart
         localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY);
@@ -405,6 +414,13 @@
         if (window.toast) window.toast('Order placed — thank you!'); else alert('Order placed — thank you!');
       }catch(e){
         console.error(e);
+        // If network/server error, try Supabase fallback if available
+        if (typeof window.pushOrder === 'function'){
+          try{
+            const ok = await window.pushOrder(payload);
+            if (ok){ localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY); renderCart(); if (window.toast) window.toast('Order saved (fallback) — thank you!'); else alert('Order saved — thank you!'); return; }
+          }catch(pe){ console.warn('pushOrder fallback failed', pe); }
+        }
         if (window.toast) window.toast('Failed to place order: ' + (e.message||'error')); else alert('Failed to place order: ' + (e.message||'error'));
       }
     });

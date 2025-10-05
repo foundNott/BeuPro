@@ -4,10 +4,14 @@
   "description": "Minimal Node + SQLite backend for Her Choice PH demo",
   "main": "index.html",
   "scripts": {
-    "start": "npx http-server -c-1 . -p 3000"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "sqlite3": "^5.1.7"
+  }
 }

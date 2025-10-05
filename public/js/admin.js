@@ -38,23 +38,107 @@ async function signOut(){ const sb = await getClient(); await sb.auth.signOut();
 // render helpers
 function renderList(container, items, mapper){ container.innerHTML=''; items.forEach((it,i)=>{ const el = document.createElement('div'); el.className='item'; el.innerHTML = mapper(it,i); container.appendChild(el); }); }
 
-// Orders
-async function refreshOrders(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('orders').select('*').order('created', { ascending:true }); if (error) throw error; renderList(qs('#cust-list'), data || [], (c,i)=>`<div><strong>${c.fullname}</strong><div class="muted">${c.phone||''} • #${i+1}</div></div><div class="meta">${new Date(c.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load orders: '+(e.message||e)); }}
-async function enqueueCustomer(){ const name = qs('#cust-name').value.trim(); const phone = qs('#cust-phone').value.trim(); if (!name){ toast('Name required'); return; } try{ const sb = await getSupabase(); const payload = { fullname:name, phone, address:'(unknown)', cart: {}, total:0 }; const { error } = await sb.from('orders').insert([payload]); if (error) throw error; qs('#cust-name').value=''; qs('#cust-phone').value=''; toast('Customer enqueued'); await refreshOrders(); }catch(e){ console.error(e); toast(e.message || 'Error'); }}
-async function dequeueCustomer(){ try{ const sb = await getSupabase(); // get oldest
-  const { data, error } = await sb.from('orders').select('*').order('created',{ascending:true}).limit(1).maybeSingle(); if (error) throw error; if (!data) { toast('No customers'); return; }
-  const del = await sb.from('orders').delete().eq('id', data.id);
-  if (del.error) throw del.error; toast('Dequeued: '+(data.fullname||data.id)); await refreshOrders(); }catch(e){ console.error(e); toast(e.message || 'No customers'); }}
+// Price maps used by quick-order
+const SET_PRICES = { 'set-c-1': 885, 'set-c-2': 1675, 'set-c-3': 2470 };
+const EXTRA_PRICES = { 'extra-1': 148, 'extra-2': 288 };
 
-// Deliveries
-async function refreshDeliveries(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('deliveries').select('*').order('created',{ascending:true}); if (error) throw error; renderList(qs('#del-list'), data||[], (d,i)=>`<div><strong>${d.date} ${d.time}</strong><div class="muted">${d.note||''} • #${i+1}</div></div><div class="meta">${new Date(d.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load deliveries: '+(e.message||e)); }}
-async function enqueueDelivery(){ const date = qs('#del-date').value; const time = qs('#del-time').value; const note = qs('#del-note').value; if (!date || !time){ toast('Date & time required'); return; } try{ const sb = await getSupabase(); const { error } = await sb.from('deliveries').insert([{ date, time, note }]); if (error) throw error; qs('#del-date').value=''; qs('#del-time').value=''; qs('#del-note').value=''; toast('Delivery scheduled'); await refreshDeliveries(); }catch(e){ console.error(e); toast(e.message || 'Error'); }}
-async function dequeueDelivery(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('deliveries').select('*').order('created',{ascending:true}).limit(1).maybeSingle(); if (error) throw error; if (!data) { toast('No deliveries'); return; } const del = await sb.from('deliveries').delete().eq('id', data.id); if (del.error) throw del.error; toast('Processed delivery'); await refreshDeliveries(); }catch(e){ console.error(e); toast(e.message || 'No deliveries'); }}
+// Orders: local-first refresh (see below implementation)
+// Try local API first, fallback to Supabase
+async function refreshOrders(){
+  try{
+    const res = await fetch('/api/orders');
+    if (res.ok){ const data = await res.json(); renderList(qs('#cust-list'), data || [], (c,i)=>`<div><strong>Order #${c.order_id || c.id} — ${c.fullname||'(no name)'}</strong><div class="muted">${c.phone||''} • total ₱${((c.total||0)||0).toFixed(2)} • #${i+1}</div><div class="muted" style="font-size:0.8rem">${c.address||''}</div></div><div class="meta">${new Date((c.order_created||c.created) || Date.now()).toLocaleString()}</div>`); return; }
+  }catch(e){ /* fallthrough */ }
+  // fallback to supabase
+  try{ const sb = await getSupabase(); const { data, error } = await sb.from('orders').select('*').order('created',{ascending:true}); if (error) throw error; renderList(qs('#cust-list'), data || [], (c,i)=>`<div><strong>Order #${c.id} — ${c.fullname||'(no name)'}</strong><div class="muted">${c.phone||''} • total ₱${(c.total||0).toFixed(2)} • #${i+1}</div><div class="muted" style="font-size:0.8rem">${c.address||''}</div></div><div class="meta">${new Date(c.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load orders: '+(e.message||e)); }
+}
+
+// Enqueue a new customer + order (local API preferred to avoid Supabase RLS)
+async function enqueueCustomer(){ const name = qs('#cust-name').value.trim(); const phone = qs('#cust-phone').value.trim(); if (!name){ toast('Name required'); return; } try{ const payload = { fullname:name, phone, address:'(unknown)', cart:{}, total:0 }; const res = await fetch('/api/orders/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); if (!res.ok){ const b = await res.json().catch(()=>({ error:'unknown' })); throw new Error(b.error || 'Server failed'); } qs('#cust-name').value=''; qs('#cust-phone').value=''; toast('Order enqueued'); await refreshOrders(); }catch(e){ console.error(e); toast(e.message || 'Error'); }}
+
+// Dequeue: pick oldest order, remove it and redirect admin UI to deliveries page to assign courier
+async function dequeueCustomer(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('orders').select('*').order('created',{ascending:true}).limit(1).maybeSingle(); if (error) throw error; if (!data) { toast('No orders'); return; }
+  // delete the order record (we consider it accepted)
+  const del = await sb.from('orders').delete().eq('id', data.id);
+  if (del.error) throw del.error;
+  toast('Accepted order: '+(data.fullname || data.id));
+  // navigate to deliveries page and prefill note with customer info
+  qsa('.admin-nav a').forEach(x=>x.classList.remove('active'));
+  const deliveriesLink = document.querySelector('.admin-nav a[data-target="deliveries-page"]'); if (deliveriesLink) { deliveriesLink.classList.add('active'); qsa('.admin-page').forEach(p=>p.classList.remove('is-active')); const el = document.getElementById('deliveries-page'); if (el) el.classList.add('is-active'); }
+  // prefill delivery note field
+  const noteEl = qs('#del-note'); if (noteEl){ noteEl.value = `Order #${data.id} — ${data.fullname||''} — ${data.address||''}`; }
+  await refreshOrders(); await refreshDeliveries(); }catch(e){ console.error(e); toast(e.message || 'No orders'); }}
+
+// Use local API dequeue (for normalized local db) first, fallback to supabase
+async function dequeueCustomer(){
+  try{
+    const res = await fetch('/api/orders/dequeue', { method:'POST' });
+    if (res.ok){ const data = await res.json(); toast('Accepted order: '+(data.fullname || data.id)); // prefill deliveries
+      qsa('.admin-nav a').forEach(x=>x.classList.remove('active'));
+      const deliveriesLink = document.querySelector('.admin-nav a[data-target="deliveries-page"]'); if (deliveriesLink) { deliveriesLink.classList.add('active'); qsa('.admin-page').forEach(p=>p.classList.remove('is-active')); const el = document.getElementById('deliveries-page'); if (el) el.classList.add('is-active'); }
+      const noteEl = qs('#del-note'); if (noteEl){ noteEl.value = `Order #${data.order_id || data.id} — ${data.fullname||''} — ${data.address||''}`; }
+      await refreshOrders(); await refreshDeliveries(); return;
+    }
+  }catch(e){ /* fallthrough */ }
+  // fallback to previous supabase logic
+  try{ const sb = await getSupabase(); const { data, error } = await sb.from('orders').select('*').order('created',{ascending:true}).limit(1).maybeSingle(); if (error) throw error; if (!data) { toast('No orders'); return; } const del = await sb.from('orders').delete().eq('id', data.id); if (del.error) throw del.error; toast('Accepted order: '+(data.fullname || data.id)); qsa('.admin-nav a').forEach(x=>x.classList.remove('active')); const deliveriesLink = document.querySelector('.admin-nav a[data-target="deliveries-page"]'); if (deliveriesLink) { deliveriesLink.classList.add('active'); qsa('.admin-page').forEach(p=>p.classList.remove('is-active')); const el = document.getElementById('deliveries-page'); if (el) el.classList.add('is-active'); } const noteEl = qs('#del-note'); if (noteEl){ noteEl.value = `Order #${data.id} — ${data.fullname||''} — ${data.address||''}`; } await refreshOrders(); await refreshDeliveries(); }catch(e){ console.error(e); toast(e.message || 'No orders'); }
+}
+
+// Deliveries: prefer local API, fallback to Supabase
+async function refreshDeliveries(){
+  try{
+    const res = await fetch('/api/deliveries');
+    if (res.ok){ const data = await res.json(); renderList(qs('#del-list'), data||[], (d,i)=>`<div><strong>${d.date} ${d.time}</strong><div class="muted">${d.note||''} • #${i+1}</div></div><div class="meta">${new Date(d.created || Date.now()).toLocaleString()}</div>`); return; }
+  }catch(e){ /* fallthrough */ }
+  try{ const sb = await getSupabase(); const { data, error } = await sb.from('deliveries').select('*').order('created',{ascending:true}); if (error) throw error; renderList(qs('#del-list'), data||[], (d,i)=>`<div><strong>${d.date} ${d.time}</strong><div class="muted">${d.note||''} • #${i+1}</div></div><div class="meta">${new Date(d.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load deliveries: '+(e.message||e)); }
+}
+async function enqueueDelivery(){ const date = qs('#del-date').value; const time = qs('#del-time').value; const note = qs('#del-note').value; if (!date || !time){ toast('Date & time required'); return; }
+  // only allow weekdays (Mon-Fri)
+  const d = new Date(date + 'T00:00:00'); const day = d.getUTCDay(); // 0 = Sun, 6 = Sat
+  if (day === 0 || day === 6){ toast('Deliveries can only be scheduled on weekdays (Mon-Fri)'); return; }
+    try{
+      // prefer local API which will mark courier unavailable when assigned
+      const courierId = qs('#del-courier')?.value || null;
+      const deliveryPayload = { date, time, note: note || '', courier_id: courierId ? Number(courierId) : null };
+      const res = await fetch('/api/deliveries', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(deliveryPayload) });
+      if (!res.ok){ const body = await res.json().catch(()=>({ error:'unknown' })); throw new Error(body.error || 'Server failed'); }
+        qs('#del-date').value=''; qs('#del-time').value=''; qs('#del-note').value=''; qs('#del-courier').value=''; toast('Delivery scheduled'); await refreshDeliveries();
+      }catch(e){ console.error(e); toast(e.message || 'Error'); }
+  }
+async function dequeueDelivery(){
+  try{
+    const res = await fetch('/api/deliveries/dequeue', { method:'POST' });
+    if (!res.ok){ const b = await res.json().catch(()=>({ error:'unknown' })); throw new Error(b.error || 'Server failed'); }
+    const data = await res.json(); toast('Processed delivery'); await refreshDeliveries();
+  }catch(e){ console.error(e); toast(e.message || 'No deliveries'); }
+}
 
 // Couriers
-async function refreshCouriers(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('couriers').select('*').order('created',{ascending:true}); if (error) throw error; renderList(qs('#courier-list'), data||[], (c,i)=>`<div><strong>${c.name}</strong><div class="muted">${c.vehicle||''} • #${i+1}</div></div><div class="meta">${new Date(c.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load couriers: '+(e.message||e)); }}
-async function enqueueCourier(){ const name = qs('#courier-name').value.trim(); const vehicle = qs('#courier-vehicle').value.trim(); if (!name){ toast('Courier name required'); return; } try{ const sb = await getSupabase(); const { error } = await sb.from('couriers').insert([{ name, vehicle }]); if (error) throw error; qs('#courier-name').value=''; qs('#courier-vehicle').value=''; toast('Courier enqueued'); await refreshCouriers(); }catch(e){ console.error(e); toast(e.message || 'Error'); }}
-async function dequeueCourier(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('couriers').select('*').order('created',{ascending:true}).limit(1).maybeSingle(); if (error) throw error; if (!data){ toast('No couriers'); return; } const del = await sb.from('couriers').delete().eq('id', data.id); if (del.error) throw del.error; toast('Dequeued courier'); await refreshCouriers(); }catch(e){ console.error(e); toast(e.message || 'No couriers'); }}
+// Couriers: prefer local API and show availability badge
+async function refreshCouriers(){
+  try{
+    const res = await fetch('/api/couriers');
+    if (res.ok){ const data = await res.json(); renderList(qs('#courier-list'), data||[], (c,i)=>`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><strong>${c.name}</strong><div class=\"muted\">${c.vehicle||''} • #${i+1}</div></div><div style=\"min-width:120px;text-align:right\">${c.available === 1 || c.available === null || typeof c.available === 'undefined' ? '<span style=\"color:green;font-weight:700\">Available</span>' : '<span style=\"color:#b33;font-weight:700\">Assigned</span>'}</div></div><div class=\"meta\">${new Date(c.created || Date.now()).toLocaleString()}</div>`); return; }
+  }catch(e){ /* fallthrough */ }
+  try{ const sb = await getSupabase(); const { data, error } = await sb.from('couriers').select('*').order('created',{ascending:true}); if (error) throw error; renderList(qs('#courier-list'), data||[], (c,i)=>`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><strong>${c.name}</strong><div class=\"muted\">${c.vehicle||''} • #${i+1}</div></div><div style=\"min-width:120px;text-align:right\">${c.available === 1 || c.available === null || typeof c.available === 'undefined' ? '<span style=\"color:green;font-weight:700\">Available</span>' : '<span style=\"color:#b33;font-weight:700\">Assigned</span>'}</div></div><div class=\"meta\">${new Date(c.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load couriers: '+(e.message||e)); }
+}
+
+async function populateCourierSelect(){
+  try{
+    const res = await fetch('/api/couriers');
+    if (res.ok){ const data = await res.json(); const sel = qs('#del-courier'); if (!sel) return; sel.innerHTML = '<option value="">Choose courier</option>'; (data||[]).forEach(c=>{ const opt = document.createElement('option'); opt.value = c.id; opt.textContent = `${c.name} (${c.vehicle||'n/a'})`; sel.appendChild(opt); }); return; }
+  }catch(e){ /* fallthrough */ }
+  try{ const sb = await getSupabase(); const { data, error } = await sb.from('couriers').select('*').order('created',{ascending:true}); if (error) throw error; const sel = qs('#del-courier'); if (!sel) return; sel.innerHTML = '<option value="">Choose courier</option>'; (data||[]).forEach(c=>{ const opt = document.createElement('option'); opt.value = c.id; opt.textContent = `${c.name} (${c.vehicle||'n/a'})`; sel.appendChild(opt); }); }catch(e){ console.warn('populateCourierSelect failed', e); }
+}
+
+async function enqueueCourier(){
+  const name = qs('#courier-name').value.trim(); const vehicle = qs('#courier-vehicle').value.trim(); if (!name){ toast('Courier name required'); return; }
+  try{
+    const res = await fetch('/api/couriers', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name, vehicle }) });
+    if (!res.ok){ const b = await res.json().catch(()=>({ error:'unknown' })); throw new Error(b.error || 'Server failed'); }
+    qs('#courier-name').value=''; qs('#courier-vehicle').value=''; toast('Courier added'); await refreshCouriers();
+  }catch(e){ console.error(e); toast(e.message || 'Error'); }
+}
 
 // Promotions (simple CRUD: admin adds promotion links; front-end will fetch them)
 async function refreshPromotions(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('promotions').select('*').order('created',{ascending:false}); if (error) throw error; renderList(qs('#promo-list'), data||[], (p,i)=>`<div><strong>${p.title}</strong><div class="muted">${p.link||''} • #${i+1}</div></div><div class="meta">${new Date(p.created || Date.now()).toLocaleString()}</div>`); }catch(e){ console.error(e); toast('Failed to load promotions: '+(e.message||e)); }}
@@ -89,7 +173,6 @@ export async function initAdmin(){
   qs('#enq-del').addEventListener('click', enqueueDelivery);
   qs('#deq-del').addEventListener('click', dequeueDelivery);
   qs('#enq-courier').addEventListener('click', enqueueCourier);
-  qs('#deq-courier').addEventListener('click', dequeueCourier);
   // promotions
   const promoAddBtn = qs('#promo-add'); if (promoAddBtn) promoAddBtn.addEventListener('click', addPromotion);
   const promoRemoveBtn = qs('#promo-remove'); if (promoRemoveBtn) promoRemoveBtn.addEventListener('click', removePromotion);
@@ -142,8 +225,44 @@ export async function initAdmin(){
   try{ await Promise.all([refreshOrders(), refreshDeliveries(), refreshCouriers()]); }catch(e){ console.warn('Initial data load failed - supabase may not be configured', e); }
   // load promotions if present
   try{ await refreshPromotions(); }catch(e){ /* ignore */ }
+  // populate courier dropdown
+  try{ await populateCourierSelect(); }catch(e){ /* ignore */ }
   // load comments for moderation
   try{ await refreshComments(); }catch(e){ /* ignore */ }
+  // quick admin order placement (right-side small form)
+  const quickPlace = qs('#quick-place');
+  if (quickPlace) quickPlace.addEventListener('click', async ()=>{
+    const fullname = qs('#quick-fullname').value.trim();
+    const phone = qs('#quick-phone').value.trim();
+    const address = qs('#quick-address').value.trim();
+    const city = qs('#quick-city').value.trim();
+    const postal = qs('#quick-postal').value.trim();
+    if (!fullname || !phone || !address || !city || !postal){ toast('Please fill fullname, phone, address, city and postal'); return; }
+    // build simple cart from checked products and compute prices
+    const selected = Array.from(document.querySelectorAll('.admin-prod:checked')).map(cb=>cb.dataset.id);
+    const cart = { set: null, extras: [] };
+    let total = 0;
+    selected.forEach(id=>{
+      if (id.startsWith('set-')){
+        const price = SET_PRICES[id] || 0;
+        cart.set = { id, name: id, price };
+        total += price;
+      } else {
+        const price = EXTRA_PRICES[id] || 0;
+        cart.extras.push({ id, name: id, price });
+        total += price;
+      }
+    });
+    const payload = { fullname, phone, email:'', address, city, postal, payment: qs('#quick-payment').value||'cod', comments:'(admin)', cart, total };
+    try{
+      // POST to local admin endpoint which inserts into local orders table
+      const res = await fetch('/api/orders/admin', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if (!res.ok){ const body = await res.json().catch(()=>({ error:'unknown' })); throw new Error(body.error || 'Server failed'); }
+      toast('Order added'); // clear form
+      qs('#quick-fullname').value=''; qs('#quick-phone').value=''; qs('#quick-address').value=''; qs('#quick-city').value=''; qs('#quick-postal').value=''; document.querySelectorAll('.admin-prod').forEach(x=>x.checked=false);
+      await refreshOrders();
+    }catch(e){ console.error(e); toast('Failed to add order: '+(e.message||e)); }
+  });
   // comment action delegation (approve/remove/pin)
   const commentsContainer = qs('#comments-list');
   if (commentsContainer){ commentsContainer.addEventListener('click', (ev)=>{

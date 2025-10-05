@@ -42,7 +42,7 @@
     <aside class="admin-sidebar">
       <h3>Dashboard</h3>
       <nav class="admin-nav">
-        <a href="#orders" data-target="orders-page">Customer Orders</a>
+  <a href="#orders" data-target="orders-page">Orders</a>
         <a href="#deliveries" data-target="deliveries-page">Deliveries</a>
         <a href="#couriers" data-target="couriers-page">Couriers</a>
         <a href="#comments" data-target="comments-page">Comments</a>
@@ -53,15 +53,41 @@
     <main class="admin-main">
   <div id="orders-page" class="admin-page">
         <section class="panel">
-          <h2>Customer Orders (FIFO Queue)</h2>
-          <div class="controls">
-            <input id="cust-name" placeholder="Customer name" class="input small">
-            <input id="cust-phone" placeholder="Phone" class="input small">
-            <button id="enq-cust" class="btn">Enqueue Customer</button>
-            <button id="deq-cust" class="btn secondary">Dequeue Customer</button>
+          <h2>Orders (FIFO Queue)</h2>
+          <div style="display:flex;gap:18px;align-items:flex-start">
+            <div style="flex:1">
+              <div class="controls">
+                <input id="cust-name" placeholder="Customer name" class="input small">
+                <input id="cust-phone" placeholder="Phone" class="input small">
+                <button id="enq-cust" class="btn">Enqueue Order</button>
+                <button id="deq-cust" class="btn secondary">Accept Next Order</button>
+              </div>
+              <div class="muted small">Order queue (oldest at top)</div>
+              <div id="cust-list" class="list"></div>
+            </div>
+            <div style="width:360px">
+              <div style="background:rgba(0,0,0,0.02);padding:12px;border-radius:8px">
+                <h3 style="margin:0 0 8px 0">Quick Order</h3>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <input id="quick-fullname" placeholder="Fullname" class="input small">
+                  <input id="quick-phone" placeholder="Phone" class="input small">
+                  <input id="quick-address" placeholder="Address" class="input small">
+                  <div style="display:flex;gap:8px"><input id="quick-city" placeholder="City" class="input small" style="flex:1"><input id="quick-postal" placeholder="Postal" class="input small" style="width:100px"></div>
+                  <label>Select product(s)</label>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                      <label><input type="checkbox" data-id="set-c-1" class="admin-prod"> Set-C (1 Set)</label>
+                      <label><input type="checkbox" data-id="set-c-2" class="admin-prod"> Set-C (2 Sets)</label>
+                      <label><input type="checkbox" data-id="set-c-3" class="admin-prod"> Set-C (3 Sets)</label>
+                    <label><input type="checkbox" data-id="extra-1" class="admin-prod"> IBB Soap</label>
+                    <label><input type="checkbox" data-id="extra-2" class="admin-prod"> Sunshield SPF50</label>
+                  </div>
+                  <select id="quick-payment" class="input small"><option value="cod">COD</option><option value="gpay">GCash</option></select>
+                  <button id="quick-place" class="btn">Add Order</button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="muted small">Order queue (oldest at top)</div>
-          <div id="cust-list" class="list"></div>
+            <div class="muted small">Order queue (oldest at top)</div>
         </section>
       </div>
 
@@ -71,6 +97,7 @@
           <div class="controls">
             <input id="del-date" type="date" class="input small">
             <input id="del-time" type="time" class="input small">
+            <select id="del-courier" class="input small"><option value="">Choose courier</option></select>
             <input id="del-note" placeholder="Note/Address" class="input small">
             <button id="enq-del" class="btn">Schedule Delivery</button>
             <button id="deq-del" class="btn secondary">Process Next Delivery</button>
@@ -86,8 +113,7 @@
           <div class="controls">
             <input id="courier-name" placeholder="Courier name" class="input small">
             <input id="courier-vehicle" placeholder="Vehicle/Plate" class="input small">
-            <button id="enq-courier" class="btn">Enqueue Courier</button>
-            <button id="deq-courier" class="btn secondary">Dequeue Courier</button>
+            <button id="enq-courier" class="btn">Add Courier</button>
           </div>
           <div class="muted small">Available couriers (oldest at top)</div>
           <div id="courier-list" class="list"></div>
