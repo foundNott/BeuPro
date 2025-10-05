@@ -8,12 +8,25 @@ export async function getSupabase(){
   const url = cfg.url || document.querySelector('meta[name="supabase-url"]')?.content;
   const anonKey = cfg.anonKey || document.querySelector('meta[name="supabase-key"]')?.content;
   if (!url || !anonKey) throw new Error('Supabase not configured');
-  if (window.__HC__ && window.__HC__.supabase) return window.__HC__.supabase;
-  const m = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-  const sb = m.createClient(url, anonKey);
+  // Prevent parallel calls creating multiple Supabase clients (which spawns multiple GoTrue instances)
   window.__HC__ = window.__HC__ || {};
-  window.__HC__.supabase = sb;
-  return sb;
+  if (window.__HC__.supabase) return window.__HC__.supabase;
+  if (window.__HC__.supabasePromise) return await window.__HC__.supabasePromise;
+
+  // create and cache a promise so concurrent callers reuse the same client
+  window.__HC__.supabasePromise = (async ()=>{
+    const m = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+    const sb = m.createClient(url, anonKey);
+    window.__HC__ = window.__HC__ || {};
+    window.__HC__.supabase = sb;
+    // once initialized, remove the promise ref
+    delete window.__HC__.supabasePromise;
+    return sb;
+  })();
+
+  // small debug: show which Supabase URL we're initializing (do not print the anon key)
+  try{ console.debug('Initializing Supabase client for', url); }catch(e){}
+  return await window.__HC__.supabasePromise;
 }
 
 // small LIFO implementation for cart/promotions/comments (bounded stack)
@@ -89,4 +102,10 @@ export function toast(message, opts={timeout:3000}){
     window.toast = window.toast || function(m,o){ return toast(m,o); };
     return el;
   }catch(e){ console.error('toast error', e); }
+}
+
+// Backwards-compatible globals for inline pages
+if (typeof window !== 'undefined'){
+  window.persistCartItem = window.persistCartItem || persistCartItemSupabase;
+  window.getSessionId = window.getSessionId || getSessionId;
 }

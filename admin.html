@@ -146,6 +146,7 @@
           <div class="controls" style="margin-top:8px">
             <input id="promo-title" placeholder="Promotion title" class="input small">
             <input id="promo-link" placeholder="https://..." class="input small">
+            <input id="promo-image" placeholder="Image URL (optional)" class="input small">
             <button id="promo-add" class="btn">Add Promotion</button>
           </div>
           <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
@@ -167,19 +168,6 @@
     import './public/js/admin.js';
   </script>
 
-  <!-- Login modal (simple) -->
-  <div id="login-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:1300">
-    <div style="background:var(--panel);padding:20px;border-radius:10px;width:320px;box-shadow:0 8px 30px rgba(0,0,0,0.6)">
-      <h3 style="margin:0 0 8px 0;font-family:'Funnel Display',serif;color:var(--bg)">Admin sign in</h3>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <input id="login-email" type="email" placeholder="Email" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--bg)">
-        <input id="login-password" type="password" placeholder="Password" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--bg)">
-        <div style="display:flex;gap:8px;justify-content:flex-end">
-          <button id="login-cancel" class="btn secondary">Cancel</button>
-          <button id="login-submit" class="btn">Sign in</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Note: login modal removed — admin.html now always redirects to /login.html when unauthenticated -->
 </body>
 </html>

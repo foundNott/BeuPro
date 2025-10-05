@@ -1,0 +1,19 @@
+{
+  "name": "beupro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Her Choice PH static site + optional local dev server",
+  "scripts": {
+    "start": "node ./scripts/server.js",
+    "stop": "node ./scripts/stop-server.js"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}

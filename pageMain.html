@@ -79,32 +79,23 @@
       <div class="product-grid" role="list">
         <!-- Sets (single-select) -->
         <button class="product-card set-card" data-type="set" data-id="set-c-1" data-name="Set-C (1 Set)" data-price="885" aria-label="Select Set-C (1 Set)">
-          <img src="Resources/set-c-1.png" alt="Set-C (1 Set)">
-          <div class="card-label">
-            <div class="card-title">Set-C (1 Set)</div>
-            <div class="card-price">₱885.00 <span class="muted">15% OFF + shipping</span></div>
-          </div>
+          <img src="Resources/1 SET.png" alt="Set-C (1 Set)">
+          <div class="card-price"><span class="muted">15% OFF + shipping</span></div>
         </button>
 
         <button class="product-card set-card" data-type="set" data-id="set-c-2" data-name="Set-C (2 Sets)" data-price="1675" aria-label="Select Set-C (2 Sets)">
-          <img src="Resources/set-c-2.png" alt="Set-C (2 Sets)">
-          <div class="card-label">
-            <div class="card-title">Set-C (2 Sets)</div>
-            <div class="card-price">₱1,675 <span class="muted">15% OFF + FREE shipping</span></div>
-          </div>
+          <img src="Resources/2 SETS.png" alt="Set-C (2 Sets)">
+            <div class="card-price"><span class="muted">15% OFF + FREE shipping</span></div>
         </button>
 
         <button class="product-card set-card" data-type="set" data-id="set-c-3" data-name="Set-C (3 Sets)" data-price="2470" aria-label="Select Set-C (3 Sets)">
-          <img src="Resources/set-c-3.png" alt="Set-C (3 Sets)">
-          <div class="card-label">
-            <div class="card-title">Set-C (3 Sets)</div>
-            <div class="card-price">₱2,470 <span class="muted">25% OFF + FREE shipping</span></div>
-          </div>
+          <img src="Resources/3 SETS.png" alt="Set-C (3 Sets)">
+            <div class="card-price"><span class="muted">25% OFF + FREE shipping</span></div>
         </button>
 
   <!-- Extras now individual selectable cards (multi-select) -->
         <button class="product-card extra-card" data-type="extra" data-id="extra-1" data-name="IBB Soap (1 Bar)" data-price="148" aria-pressed="false">
-          <img src="Resources/Product Section.png" alt="IBB Soap">
+          <img src="Resources/1IBBsoap.png" alt="IBB Soap">
           <div class="card-label">
             <div class="card-title">IBB Soap (1 Bar)</div>
             <div class="card-price">₱148</div>
@@ -113,7 +104,7 @@
         </button>
 
         <button class="product-card extra-card" data-type="extra" data-id="extra-2" data-name="Sunshield SPF50 (1 Bottle)" data-price="288" aria-pressed="false">
-          <img src="Resources/Product Section.png" alt="Sunshield SPF50">
+          <img src="Resources/2SPF50.png" alt="Sunshield SPF50">
           <div class="card-label">
             <div class="card-title">Sunshield SPF50 (1 Bottle)</div>
             <div class="card-price">₱288</div>
@@ -125,9 +116,12 @@
   </section>
 <!-- About → Promotions → Comments (reordered and simplified) -->
 <section id="about-section" class="about-promos-comments" aria-label="About and promotions">
-  <div class="about-block">
+      <div class="about-block">
     <div class="about-inner-grid">
-      <div class="about-media-col" aria-hidden="true"></div>
+      <div class="about-media-col" aria-hidden="true">
+        <!-- background is set via CSS (Resources/about.png) and we include a decorative icon -->
+        <div class="about-hero-icon" aria-hidden="true"></div>
+      </div>
       <div class="about-content-col">
         <h2>About Her Choice PH</h2>
         <p>Built on trust, heritage and visible results. Her Choice PH combines modern formulation with classic sensibilities to deliver skincare that feels luxurious and works.</p>
@@ -139,14 +133,17 @@
 
   <div class="promotions-block">
     <h2>Promotions</h2>
-    <div class="promos-carousel">
-      <button class="promo-prev">‹</button>
-      <div class="promos-track">
-        <div class="promo-item"><img src="Resources/Promo1.png" alt="Promo 1"><div class="promo-caption">Buy 2 Get 10% Off</div></div>
-        <div class="promo-item"><img src="Resources/Promo2.png" alt="Promo 2"><div class="promo-caption">Free shipping ₱1500+</div></div>
-        <div class="promo-item"><img src="Resources/Promo3.png" alt="Promo 3"><div class="promo-caption">Limited bundle</div></div>
+    <div class="promos-grid" style="display:flex;gap:12px;align-items:flex-start">
+      <div class="promos-images" style="flex:0 0 480px;display:flex;flex-direction:column;gap:8px">
+        <img id="promo-img-1" src="Resources/Promo1.png" alt="Promo 1" style="width:100%;height:160px;object-fit:cover;border-radius:8px">
+        <img id="promo-img-2" src="Resources/Promo2.png" alt="Promo 2" style="width:100%;height:120px;object-fit:cover;border-radius:8px">
+        <img id="promo-img-3" src="Resources/Promo3.png" alt="Promo 3" style="width:100%;height:120px;object-fit:cover;border-radius:8px">
       </div>
-      <button class="promo-next">›</button>
+      <div style="flex:1;max-height:320px;overflow:auto;border-radius:8px;padding:8px;border:1px solid rgba(0,0,0,0.04)" aria-label="Promotions list">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div id="promo-list" class="promo-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -229,78 +226,13 @@
     import './public/js/site.js';
   </script>
   <script>
-  /* ===================[ Cart LIFO helpers + Undo toast ]=================== */
+  // Keep only lightweight UI helpers on the page; cart logic now lives in shared modules (public/js/site.js)
   (function(){
-    const STORAGE_KEY = 'hc_cart_v1';
-    const UNDO_TIMEOUT = 6000; // ms
-    let undoTimer = null;
-    let lastPushed = null;
-
-    function readCart(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { set: null, extras: [] }; } catch(e){ return { set: null, extras: [] }; } }
-    function writeCart(cart){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); window.dispatchEvent(new Event('storage')); } catch(e){} }
-
-    // push an item onto the extras stack (LIFO)
-    function pushCart(item){ const cart = readCart(); cart.extras = cart.extras || []; cart.extras.push(item); writeCart(cart); showUndoToast(item); lastPushed = item; }
-    function undoCart(){ const cart = readCart(); if (!cart.extras || cart.extras.length===0) return; const popped = cart.extras.pop(); writeCart(cart); hideUndoToast(); return popped; }
-    function listCart(){ return readCart(); }
-
-    // Undo toast UI
-    const undoToast = document.getElementById('undo-toast');
-    const undoMsg = document.getElementById('undo-msg');
-    const undoBtn = document.getElementById('undo-btn');
-    const undoClose = document.getElementById('undo-close');
-
-    function showUndoToast(item){ if (!undoToast) return; undoMsg.textContent = `Added ${item.name}`; undoToast.classList.add('show'); if (undoTimer) clearTimeout(undoTimer); undoTimer = setTimeout(()=>{ hideUndoToast(); }, UNDO_TIMEOUT); }
-    function hideUndoToast(){ if (!undoToast) return; undoToast.classList.remove('show'); if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } }
-
-    if (undoBtn) undoBtn.addEventListener('click', ()=>{ const popped = undoCart(); if (popped) {
-      // reflect selection UI
-      const el = document.querySelector(`.product-card.extra-card[data-id="${popped.id}"]`);
-      if (el) { el.classList.remove('selected'); el.setAttribute('aria-pressed','false'); }
-    }});
-    if (undoClose) undoClose.addEventListener('click', ()=> hideUndoToast());
-
-    // expose
-    window.pushCart = pushCart;
-    window.undoCart = undoCart;
-    window.listCart = listCart;
-
-    // wire add-overlay click handlers on extras
-    function wireOverlays(){ document.querySelectorAll('.product-card.extra-card .add-overlay').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); const card = btn.closest('.product-card'); if (!card) return; const item = { id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price) }; // push LIFO
-        pushCart(item); // toggle selected UI
-        card.classList.add('selected'); card.setAttribute('aria-pressed','true');
-      });
-      // allow keyboard Enter/Space
-      btn.addEventListener('keydown', (e)=>{ if (e.key==='Enter' || e.key===' ') { e.preventDefault(); btn.click(); } });
-    }); }
-
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireOverlays); else wireOverlays();
-
-  /* ===================[ Comments (local fallback) ]=================== */
-  // simple local storage backed list until Supabase hookup
-    const COMMENTS_KEY = 'hc_comments_v1';
-    function readComments(){ try { return JSON.parse(localStorage.getItem(COMMENTS_KEY)) || []; } catch(e){ return []; } }
-    function writeComments(list){ try { localStorage.setItem(COMMENTS_KEY, JSON.stringify(list)); } catch(e){} }
-    function renderComments(){ const target = document.getElementById('comments-list'); if (!target) return; target.innerHTML = ''; const list = readComments(); if (!list.length) { target.innerHTML = '<div class="comment-item">No comments yet — be the first!</div>'; return; } list.slice().reverse().forEach(c=>{ const d = document.createElement('div'); d.className='comment-item'; d.innerHTML = `<strong>${escapeHtml(c.author||'Guest')}</strong><div>${escapeHtml(c.body)}</div>`; target.appendChild(d); }); }
-    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    const commentSubmit = document.getElementById('comment-submit'); if (commentSubmit) commentSubmit.addEventListener('click', async ()=>{ const author = document.getElementById('comment-author').value || 'Guest'; const body = document.getElementById('comment-body').value || ''; if (!body.trim()) return; // attempt Supabase-backed pushComment if available
-      if (typeof window.pushComment === 'function'){
-        const ok = await window.pushComment({ name: author.trim(), email: '', body: body.trim() }).catch(()=>false);
-        if (ok) { renderComments(); document.getElementById('comment-body').value=''; // optionally show toast
-          if (window.toast) window.toast('Comment submitted — pending approval'); return; }
-      }
-      // fallback to local storage
-      const list = readComments(); list.push({ author: author.trim(), body: body.trim(), created: Date.now() }); writeComments(list); document.getElementById('comment-body').value=''; renderComments();
-    });
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', renderComments); else renderComments();
-
-  /* ===================[ Promotions carousel controls ]=================== */
-  // small promos carousel controls
-    function wirePromos(){ const track = document.querySelector('.promos-track'); const prev = document.querySelector('.promo-prev'); const next = document.querySelector('.promo-next'); if (!track) return; let idx=0; const items = Array.from(track.children); function render(){ track.style.transform = `translateX(${-idx*(items[0].clientWidth+12)}px)`; }
-      if (prev) prev.addEventListener('click', ()=>{ if (idx>0) idx--; render(); }); if (next) next.addEventListener('click', ()=>{ if (idx < items.length-1) idx++; render(); }); window.addEventListener('resize', render); render(); }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wirePromos); else wirePromos();
-
+    // setup smooth scrolling, FAQ and current year
+    function setupSmoothNav(){ const navLinks = Array.from(document.querySelectorAll('.header-middle a[data-target]')); function onScroll(){ const fromTop = window.scrollY + 120; navLinks.forEach(link=>{ const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; const top = el.offsetTop; const bottom = top + el.offsetHeight; if (fromTop >= top && fromTop < bottom) link.classList.add('active'); else link.classList.remove('active'); }); }
+      navLinks.forEach(link=>{ link.addEventListener('click', (e)=>{ e.preventDefault(); const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; el.scrollIntoView({behavior:'smooth',block:'start'}); }); }); window.addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
+    function setupFAQ(){ document.querySelectorAll('.faq-item').forEach(item=>{ const btn = item.querySelector('.faq-q'); const panel = item.querySelector('.faq-a'); btn.addEventListener('click', ()=>{ const expanded = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!expanded)); panel.hidden = expanded; }); }); }
+    document.addEventListener('DOMContentLoaded', ()=>{ setupSmoothNav(); setupFAQ(); const y = new Date().getFullYear(); const yr = document.getElementById('cur-year'); if (yr) yr.textContent = y; });
   })();
   </script>
 // ...existing code...

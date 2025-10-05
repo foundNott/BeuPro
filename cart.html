@@ -209,11 +209,13 @@
   function readCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || { set:null, extras: [] }; } catch(e){ return { set:null, extras: [] }; } }
     function writeCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); renderCart(); }
 
-    // LIFO stack actions (pushCart, undoCart, listCart)
+    // LIFO stack actions (local push shim, undoCart, listCart)
     function readStack(){ try { return JSON.parse(localStorage.getItem(STACK_KEY)) || []; } catch(e){ return []; } }
     function writeStack(stack){ localStorage.setItem(STACK_KEY, JSON.stringify(stack)); }
 
-    function pushCart(action){ // action: { type:'add_extra'|'update_qty'|'set_change'|'remove_extra', payload:... }
+    // Local page shim: record an action to the LIFO stack so Undo works.
+    // The canonical implementation in /public/js/site.js will provide `window.pushCart`.
+    function pushCartLocal(action){ // action: { type:'add_extra'|'update_qty'|'set_change'|'remove_extra', payload:... }
       const stack = readStack();
       stack.push({ ts:Date.now(), action });
       writeStack(stack);
@@ -266,7 +268,7 @@
         const cart = readCart();
         cart.set = newSet ? { id:newSet.id, name:newSet.name, price:newSet.price } : null;
         writeCart(cart);
-        pushCart({ type:'set_change', payload:{ prevSet: prev, newSet: cart.set } });
+        pushCartLocal({ type:'set_change', payload:{ prevSet: prev, newSet: cart.set } });
       });
     }
 
@@ -303,15 +305,15 @@
           const cart = readCart();
           const existing = cart.extras.find(e=>e.id===ex.id);
           if (q === 0){
-            if (existing) { // remove
+              if (existing) { // remove
               const prev = Object.assign({}, existing);
               cart.extras = cart.extras.filter(x=>x.id!==ex.id);
               writeCart(cart);
-              pushCart({ type:'remove_extra', payload:{ id:ex.id, prev } });
+              pushCartLocal({ type:'remove_extra', payload:{ id:ex.id, prev } });
             }
           } else {
-            if (existing) { const prevQty = existing.qty || 1; existing.qty = q; writeCart(cart); pushCart({ type:'update_qty', payload:{ id:ex.id, prevQty } }); }
-            else { const newItem = { id:ex.id, name:ex.name, price:ex.price, qty:q }; cart.extras.push(newItem); writeCart(cart); pushCart({ type:'add_extra', payload:{ id:ex.id, qty:q } }); if (window.persistCartItem) window.persistCartItem(newItem); }
+            if (existing) { const prevQty = existing.qty || 1; existing.qty = q; writeCart(cart); pushCartLocal({ type:'update_qty', payload:{ id:ex.id, prevQty } }); }
+            else { const newItem = { id:ex.id, name:ex.name, price:ex.price, qty:q }; cart.extras.push(newItem); writeCart(cart); pushCartLocal({ type:'add_extra', payload:{ id:ex.id, qty:q } }); if (window.persistCartItem) window.persistCartItem(newItem); }
           }
         }
 
@@ -414,7 +416,7 @@
         if (window.toast) window.toast('Order placed — thank you!'); else alert('Order placed — thank you!');
       }catch(e){
         console.error(e);
-        // If network/server error, try Supabase fallback if available
+        // Always attempt Supabase fallback when the server POST fails
         if (typeof window.pushOrder === 'function'){
           try{
             const ok = await window.pushOrder(payload);
@@ -428,10 +430,7 @@
     // initial setup
     initSets(); renderExtras(); renderCart();
 
-    // expose API globally for pageMain and other pages
-    window.pushCart = pushCart;
-    window.undoCart = undoCart;
-    window.listCart = listCart;
+    // Export only low-level read/write hooks for legacy pages; cart actions are provided by /public/js/site.js
     window.__hc_readCart = readCart; window.__hc_writeCart = writeCart;
   })();
   </script>

@@ -20,12 +20,18 @@ npm install
 3) Start the server (development):
 
 ```fish
-npm run dev
-# or for production
-npm start
+cd /home/kyusi/Downloads/BeuPro
+npm install
+npm start    # starts the included minimal static server (writes .server.pid)
 ```
 
-The server will listen on http://localhost:3000 by default.
+To stop the server that was started with `npm start` run:
+
+```fish
+npm stop
+```
+
+The dev server listens on http://localhost:3000 by default.
 
 API endpoints (examples)
 

@@ -1,13 +1,4 @@
-import './toast.js';
-
-async function getSupabase(){
-  const cfg = window.__SUPABASE__ || {};
-  const url = cfg.url || document.querySelector('meta[name="supabase-url"]')?.content;
-  const anonKey = cfg.anonKey || document.querySelector('meta[name="supabase-key"]')?.content;
-  if (!url || !anonKey) throw new Error('Supabase not configured');
-  const m = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-  return m.createClient(url, anonKey);
-}
+import { getSupabase } from './core.js';
 
 async function signIn(email, password){ const sb = await getSupabase(); return sb.auth.signInWithPassword({ email, password }); }
 
@@ -20,10 +11,13 @@ window.addEventListener('DOMContentLoaded', ()=>{
     if (!email || !password){ msg.textContent = 'Email and password required'; return; }
     msg.textContent = 'Signing in...';
     try{
-      const res = await signIn(email,password);
-      if (res.error) { msg.textContent = res.error.message || 'Sign in failed'; return; }
-      // redirect to admin
-      window.location.href = '/admin.html';
+  const res = await signIn(email,password);
+  // Supabase v2 returns { data, error }
+  const err = res?.error || (res?.data?.error) || null;
+  const user = (res && res.data && res.data.user) ? res.data.user : null;
+  if (err || !user){ msg.textContent = (err && (err.message||String(err))) || 'Sign in failed'; return; }
+  // success -> redirect to admin and force reload so admin module fetches lists
+  window.location.href = '/admin.html';
     }catch(e){ msg.textContent = 'Sign in error: '+(e.message||e); }
   });
 });
