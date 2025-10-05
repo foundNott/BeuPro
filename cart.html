@@ -359,32 +359,38 @@
     undoActionBtn.addEventListener('click', ()=>{ undoCart(); undoBar.style.display='none'; });
     undoCloseBtn.addEventListener('click', ()=>{ undoBar.style.display='none'; });
 
-    // Place order
-    document.getElementById('place-order').addEventListener('click', ()=>{
+    // Place order -> POST to API and show toast
+    document.getElementById('place-order').addEventListener('click', async ()=>{
       const cart = readCart();
       const form = document.getElementById('checkout-form');
-      if (!cart.set){ alert('Please select a set before placing an order.'); setSelect.focus(); return; }
+      if (!cart.set){ window.toast ? window.toast('Please select a set before placing an order.') : alert('Please select a set before placing an order.'); setSelect.focus(); return; }
       if (!form.reportValidity()) { return; }
-      // simple order summary and clear cart
-      const order = { cart, customer: {
+
+      const payload = {
         fullname: form.fullname.value,
         phone: form.phone.value,
         email: form.email.value,
-        facebook: form.facebook.value,
         address: form.address.value,
         city: form.city.value,
         postal: form.postal.value,
         payment: form.payment.value,
-        comments: form.comments.value
-      }, total: document.getElementById('cart-total').textContent, created: Date.now() };
-      // for now simulate submission by saving to localStorage 'hc_orders' as FIFO queue
+        comments: form.comments.value,
+        cart: cart,
+        total: Number((document.getElementById('cart-total').textContent||'₱0').replace(/[₱,]/g,'')) || 0
+      };
+
       try{
-        const orders = JSON.parse(localStorage.getItem('hc_orders_v1')||'[]'); orders.push(order); localStorage.setItem('hc_orders_v1', JSON.stringify(orders));
-      } catch(e){}
-      // clear cart
-      localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY);
-      renderCart();
-      alert('Order placed — thank you! Your order was saved locally (for demo).');
+        const resp = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        if (!resp.ok){ const err = await resp.json().catch(()=>({error:resp.statusText})); throw new Error(err.error || err || 'Request failed'); }
+        const data = await resp.json();
+        // clear cart
+        localStorage.removeItem(CART_KEY); localStorage.removeItem(STACK_KEY);
+        renderCart();
+        if (window.toast) window.toast('Order placed — thank you!'); else alert('Order placed — thank you!');
+      }catch(e){
+        console.error(e);
+        if (window.toast) window.toast('Failed to place order: ' + (e.message||'error')); else alert('Failed to place order: ' + (e.message||'error'));
+      }
     });
 
     // initial setup
@@ -397,5 +403,6 @@
     window.__hc_readCart = readCart; window.__hc_writeCart = writeCart;
   })();
   </script>
+  <script src="./public/js/toast-plain.js"></script>
 </body>
 </html>

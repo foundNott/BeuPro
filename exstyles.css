@@ -1,0 +1,50 @@
+
+/* ===================[ Admin Styles ]=================== */
+:root{
+  --bg: #F7F3EA; /* off-white token */
+  --charcoal: #111217; /* charcoal black */
+  --panel: #1b1b1b;
+  --muted: rgba(255,255,255,0.65);
+}
+
+/* Always prefer the provided off-white, never pure white */
+body.admin { font-family: 'Atkinson Hyperlegible', Arial, sans-serif; background: var(--charcoal); color: var(--bg); padding-top: 64px; }
+
+.admin-layout { max-width:1200px; margin:24px auto; display:grid; grid-template-columns:240px 1fr; gap:20px; padding:0 20px; }
+.admin-sidebar { background:var(--panel); border-radius:10px; padding:14px; position:sticky; top:84px; height:fit-content; border:1px solid rgba(255,255,255,0.03) }
+.admin-sidebar h3{ font-family:'Atkinson Hyperlegible', serif; color:var(--bg); margin:0 0 10px 0 }
+.admin-nav { display:flex;flex-direction:column; gap:8px }
+.admin-nav a{ text-decoration:none; padding:8px 10px; border-radius:8px; color:var(--bg); background:transparent }
+.admin-nav a.active{ background:var(--bg); color:var(--charcoal); font-weight:700 }
+
+.admin-main { display:flex; flex-direction:column; gap:16px }
+.panel { background:var(--panel); border-radius:10px; padding:14px; border:1px solid rgba(255,255,255,0.02); }
+.panel h2{ font-family:'Funnel Display',serif; margin:0 0 8px 0; color:var(--bg); font-size:1.25rem }
+.panel .controls{ display:flex; gap:8px; flex-wrap:wrap }
+.input, input, select, textarea{ padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent; color:var(--bg); font-size:0.95rem }
+.input:focus, input:focus, select:focus, textarea:focus{ outline:2px solid rgba(255,255,255,0.06); }
+.btn { background:var(--bg); color:var(--charcoal); border:none;padding:8px 12px;border-radius:8px; cursor:pointer }
+.btn.secondary{ background:transparent;color:var(--bg); border:1px solid rgba(255,255,255,0.04) }
+.list { margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:320px; overflow:auto }
+.list .item{ padding:10px;border-radius:8px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:flex;justify-content:space-between; gap:12px; align-items:center }
+.meta { font-size:0.9rem }
+.muted { color:var(--muted); font-size:0.85rem }
+
+/* login modal styling (minimal) */
+#login-modal{ display:none }
+#login-modal > div{ max-width:100%; }
+
+/* status and auth button tweaks */
+#supabase-status{ color:var(--muted); }
+#auth-btn{ font-size:0.9rem }
+.small { font-size:0.85rem }
+
+/* pages container: only show active page */
+.admin-page{ display:none }
+.admin-page.is-active{ display:block }
+
+@media (max-width:980px){
+	.admin-layout{ grid-template-columns:1fr; }
+	.admin-sidebar{ position:relative; top:auto }
+}
+
