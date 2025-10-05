@@ -82,3 +82,7 @@ To run a local static server for testing:
 Configuration:
 - Provide a `public/js/supabase-config.js` (copy `public/js/supabase-config.example.js`) and fill in your Supabase project URL and anon key.
 - Apply the RLS policies in `supabase-policies.sql` in your Supabase SQL editor if you want permissive client access for this demo.
+
+Migration: create cart_items + ensure orders
+-----------------------------------------
+If you see "cart table missing" or "database not connected" errors, run the SQL migration file `migrations/001_create_cart_items_and_orders.sql` in your Supabase project's SQL editor. This creates a minimal `cart_items` table and a defensive `orders` table used by the frontend.

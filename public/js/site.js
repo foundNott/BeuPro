@@ -21,21 +21,7 @@ export async function pushCart(product){
   if (String(product.id).startsWith('set')) inMemoryCart.set = { id: product.id, name: product.name || product.id, price: product.price || 0 };
   else { inMemoryCart.extras = inMemoryCart.extras || []; const ex = inMemoryCart.extras.find(e=>e.id===product.id); if (ex) ex.qty = (ex.qty||0) + (product.qty||1); else inMemoryCart.extras.push(Object.assign({}, product)); }
   try{ await persistCartItemSupabase(product, getSessionId()).catch(()=>{}); }catch(e){}
-  // Also sync to legacy localStorage cart used by inline pages (hc_cart_v1)
-  try{
-    const CART_KEY = 'hc_cart_v1';
-    const raw = localStorage.getItem(CART_KEY);
-    const legacy = raw ? JSON.parse(raw) : { set: null, extras: [] };
-    if (String(product.id).startsWith('set')){
-      legacy.set = { id: product.id, name: product.name || product.id, price: product.price || product.price || 0 };
-    } else {
-      legacy.extras = legacy.extras || [];
-      const le = legacy.extras.find(e=>e.id===product.id);
-      if (le) le.qty = (Number(le.qty)||0) + (Number(product.qty)||1);
-      else legacy.extras.push({ id: product.id, name: product.name, price: product.price, qty: product.qty || 1 });
-    }
-    localStorage.setItem(CART_KEY, JSON.stringify(legacy));
-  }catch(e){ /* ignore localStorage errors */ }
+  // Do not persist cart to localStorage (privacy): rely on Supabase only for persistence
   window.dispatchEvent(new Event('storage'));
   toast(`Added ${product.name || product.id}`);
   return product;
@@ -68,15 +54,8 @@ function wireCartUI(){
 
 // Fallback: bootstrap from legacy localStorage cart if Supabase isn't available
 function bootstrapFromLocalStorage(){
-  try{
-    const raw = localStorage.getItem('hc_cart_v1');
-    if (!raw) return;
-    const legacy = JSON.parse(raw);
-    if (!legacy) return;
-    if (legacy.set) pushCart(legacy.set).catch(()=>{});
-    (legacy.extras||[]).forEach(e=>{ pushCart(e).catch(()=>{}); });
-    window.dispatchEvent(new Event('storage'));
-  }catch(e){ /* ignore parsing errors */ }
+  // intentionally no-op: we do not restore previous cart items from localStorage
+  return;
 }
 
 /* ------------------ Promotions ------------------ */
@@ -130,9 +109,21 @@ export function listComments(){ return readComments(); }
 // Insert an order into Supabase and clear the session's cart_items
 export async function pushOrder(orderPayload){
   try{
+    // 1) prefer local API if available
+    try{
+      const r = await fetch('/api/health');
+      if (r.ok){
+        const resp = await fetch('/api/orders', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(orderPayload) });
+        if (!resp.ok) throw new Error('local insert failed');
+        // clear local cart items for this session
+        try{ await fetch(`/api/cart_items?session_id=${encodeURIComponent(getSessionId())}`, { method:'DELETE' }); }catch(_){ }
+        return true;
+      }
+    }catch(_){ /* fallthrough to Supabase */ }
+
+    // 2) Supabase
     const sb = await getSupabase();
     const sid = getSessionId();
-    // Preferred schema: explicit order columns
     const orderRow = {
       fullname: orderPayload.fullname || orderPayload.name || null,
       phone: orderPayload.phone || null,
@@ -145,29 +136,11 @@ export async function pushOrder(orderPayload){
       cart: orderPayload.cart || null,
       total: Number(orderPayload.total || 0)
     };
-    let res = await sb.from('orders').insert([orderRow]).select();
-    if (error) throw error;
-    // remove cart items for this session
-    const del = await sb.from('cart_items').delete().eq('session_id', sid);
-    if (del.error) console.warn('failed to clear cart_items after order', del.error);
+    const res = await sb.from('orders').insert([orderRow]).select();
+    if (res.error) throw res.error;
+    try{ await sb.from('cart_items').delete().eq('session_id', sid); }catch(_){ }
     return true;
-  }catch(e){
-    // Some older schemas used a 'meta' jsonb column; if PostgREST reports missing column try fallback
-    console.warn('pushOrder failed', e);
-    const isPgRestSchemaErr = (e && e.code === 'PGRST204') || (e && /meta/.test(String(e.message||'')).toLowerCase());
-    if (isPgRestSchemaErr){
-      try{
-        const sb2 = await getSupabase();
-        const sid = getSessionId();
-        const fallback = { session_id: sid, meta: orderPayload };
-        const r2 = await sb2.from('orders').insert([fallback]).select();
-        if (r2.error) throw r2.error;
-        try{ await sb2.from('cart_items').delete().eq('session_id', sid); }catch(_){}
-        return true;
-      }catch(e2){ console.warn('pushOrder fallback failed', e2); return false; }
-    }
-    return false;
-  }
+  }catch(e){ console.warn('pushOrder failed', e); return false; }
 }
 
 /* ------------------ Initialization ------------------ */
@@ -178,25 +151,31 @@ if (typeof window !== 'undefined'){
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start); else start();
 }
 
-// On load, bootstrap cart from Supabase (push each saved item into our LIFO stack)
+// On load, bootstrap cart: try Supabase, then local API, then legacy localStorage
 if (typeof window !== 'undefined'){
   (async ()=>{
+    const sid = getSessionId();
+    // 1) Supabase
     try{
       const sb = await getSupabase();
-      const sid = getSessionId();
       const resp = await sb.from('cart_items').select('*').eq('session_id', sid).order('created',{ascending:true});
       const data = resp?.data || null;
       const error = resp?.error || null;
-      if (error){
-        console.warn('Failed to fetch cart_items from Supabase', error);
-        try{ if (window.toast) window.toast('Could not load remote cart (Supabase). Using local cart.'); }catch(e){}
-      }
-      if (!error && data && data.length){
+      if (error) throw error;
+      if (data && data.length){
         // data is ordered oldest->newest; push each meta onto stack to preserve insertion order
         for (const row of data){ const meta = row.meta || {}; if (meta && meta.id){ try{ await pushCart(meta); }catch(e){} } }
+        window.dispatchEvent(new Event('storage'));
+        return;
       }
-      window.dispatchEvent(new Event('storage'));
-    }catch(e){/*ignore*/}
+    }catch(e){
+      console.warn('Supabase cart bootstrap failed', e);
+      try{ if (window.toast) window.toast('Could not load remote cart (Supabase). Trying local API/local cart.'); }catch(_){ }
+    }
+
+    // If Supabase failed, we fallback to legacy localStorage only
+    bootstrapFromLocalStorage();
+    window.dispatchEvent(new Event('storage'));
   })();
 }
 

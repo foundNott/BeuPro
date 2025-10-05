@@ -29,6 +29,11 @@ export async function getSupabase(){
   return await window.__HC__.supabasePromise;
 }
 
+// helper: check if local api is available
+export async function isLocalApiAvailable(){
+  try{ const r = await fetch('/api/health', { method:'GET' }); return r.ok; }catch(e){ return false; }
+}
+
 // small LIFO implementation for cart/promotions/comments (bounded stack)
 export function createStack(limit = 100){
   const arr = [];
@@ -54,29 +59,27 @@ export function createQueue(limit = 100){
 
 // export helper to use push to Supabase `cart_items`
 export async function persistCartItemSupabase(item, session_id){
-  const sb = await getSupabase();
   const sid = session_id || getSessionId();
   const payload = { session_id: sid, product_id: item.id, meta: item, quantity: item.qty || 1 };
+  // If local API present, use it (local sqlite mode); otherwise use Supabase
+  if (await isLocalApiAvailable()){
+    const resp = await fetch('/api/cart_items', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+    if (!resp.ok) throw new Error('Local API failed');
+    return await resp.json();
+  }
+  const sb = await getSupabase();
   const { data, error } = await sb.from('cart_items').insert([payload]);
-  if (error) throw error;
+  if (error){ console.error('persistCartItemSupabase failed:', error); try{ if (typeof toast === 'function') toast('Remote cart not available — ask admin to add cart_items table in Supabase'); }catch(_){ } throw error; }
   return data;
 }
 
 // Manage a small non-sensitive session id stored locally to correlate anonymous carts across reloads.
 export function getSessionId(){
-  try{
-    if (window.__HC__ && window.__HC__.sessionId) return window.__HC__.sessionId;
-    const key = 'hc_session_id_v1';
-    let sid = localStorage.getItem(key);
-    if (!sid){ sid = 'sess_'+Math.random().toString(36).slice(2,12); localStorage.setItem(key, sid); }
-    window.__HC__ = window.__HC__ || {};
-    window.__HC__.sessionId = sid;
-    return sid;
-  }catch(e){ // localStorage may be blocked; fallback to in-memory session
-    if (!window.__HC__) window.__HC__ = {};
-    if (!window.__HC__.sessionId) window.__HC__.sessionId = 'sess_'+Math.random().toString(36).slice(2,12);
-    return window.__HC__.sessionId;
-  }
+  // Use an in-memory session id per page load only (do not persist across reloads)
+  if (window.__HC__ && window.__HC__.sessionId) return window.__HC__.sessionId;
+  if (!window.__HC__) window.__HC__ = {};
+  window.__HC__.sessionId = 'sess_'+Math.random().toString(36).slice(2,12);
+  return window.__HC__.sessionId;
 }
 
 // Toast utilities (moved here so pages only import core.js)
