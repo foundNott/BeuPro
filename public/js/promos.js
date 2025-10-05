@@ -20,6 +20,7 @@
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
 
+  
   // try fetching promos; fallback to static
   const promos = await fetchPromos();
   if (promos && promos.length) renderPromos(promos);
