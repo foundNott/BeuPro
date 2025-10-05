@@ -16,6 +16,9 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.static(root, { index: 'pageMain.html' }));
 
 let db;
+// Simple in-memory session store for local admin auth (development)
+const sessions = Object.create(null);
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin'; // change via env for security
 const dbPromise = (async () => {
   try{
     if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, '');
@@ -98,6 +101,55 @@ async function getDb(){ if (db) return db; return await dbPromise; }
 
 app.get('/api/health', (req,res)=> res.json({ ok:true, mode: 'sqlite-local' }));
 
+// ADMIN AUTH (local dev fallback)
+function parseCookieHeader(cookieHeader){
+  const out = {};
+  if (!cookieHeader) return out;
+  cookieHeader.split(';').forEach(part=>{
+    const idx = part.indexOf('='); if (idx===-1) return; const k = part.slice(0,idx).trim(); const v = part.slice(idx+1).trim(); out[k]=decodeURIComponent(v);
+  });
+  return out;
+}
+
+app.post('/api/admin/signin', async (req,res)=>{
+  try{
+    const { email, password } = req.body || {};
+    if (!email || !password) return res.status(400).json({ error: 'email & password required' });
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'invalid credentials' });
+    const token = Math.random().toString(36).slice(2,18);
+    sessions[token] = { email, created: Date.now() };
+    // set cookie for subsequent requests (same-origin)
+    res.setHeader('Set-Cookie', `hc_admin=${token}; Path=/; SameSite=Lax`);
+    res.json({ user: { id: email, email } });
+  }catch(e){ res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/admin/signout', async (req,res)=>{
+  try{
+    const cookieHeader = req.headers && req.headers.cookie;
+    const cookies = parseCookieHeader(cookieHeader);
+    const token = cookies['hc_admin'] || null;
+    if (token && sessions[token]) delete sessions[token];
+    // clear cookie
+    res.setHeader('Set-Cookie', `hc_admin=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`);
+    res.json({ ok:true });
+  }catch(e){ res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/admin/me', async (req,res)=>{
+  try{
+    const cookieHeader = req.headers && req.headers.cookie;
+    const cookies = parseCookieHeader(cookieHeader);
+    const token = cookies['hc_admin'] || null;
+    // also allow Authorization: Bearer <token>
+    if (!token && req.headers && req.headers.authorization){ const m = String(req.headers.authorization).match(/Bearer\s+(.+)$/i); if (m) token = m[1]; }
+    if (!token) return res.status(200).json({ user: null });
+    const s = sessions[token];
+    if (!s) return res.status(200).json({ user: null });
+    return res.json({ user: { id: s.email, email: s.email } });
+  }catch(e){ res.status(500).json({ error: e.message }); }
+});
+
 // CART ITEMS
 app.get('/api/cart_items', async (req,res)=>{
   try{
@@ -166,83 +218,8 @@ app.post('/api/deliveries', async (req,res)=>{ try{ const db = await getDb(); co
 // Diagnostic: list registered routes
 // diagnostic routes removed
 
-// Helper: read Supabase config from public/js/supabase-config.js
-function readSupabaseConfig(){
-  try{
-    const cfgPath = path.join(root, 'public', 'js', 'supabase-config.js');
-    if (!fs.existsSync(cfgPath)) return null;
-    const txt = fs.readFileSync(cfgPath, 'utf8');
-    const urlMatch = txt.match(/url\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
-    const keyMatch = txt.match(/anonKey\s*[:=]\s*['\"]([^'\"]+)['\"]/i);
-    if (!urlMatch || !keyMatch) return null;
-    return { url: urlMatch[1].trim().replace(/\/$/, ''), anonKey: keyMatch[1].trim() };
-  }catch(e){ return null; }
-}
-
-const sbCfg = readSupabaseConfig();
-const SUPABASE_REST = sbCfg ? `${sbCfg.url}/rest/v1` : null;
-const SUPABASE_KEY = sbCfg ? sbCfg.anonKey : null;
-
-async function supabaseFetch(pathname, options={}){
-  if (!SUPABASE_REST || !SUPABASE_KEY) throw new Error('Supabase not configured on server');
-  const url = `${SUPABASE_REST}/${pathname}`;
-  const headers = Object.assign({ 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }, options.headers || {});
-  const body = options.body;
-  const init = { method: options.method || 'GET', headers };
-  if (body) init.body = body;
-  // prefer native fetch if available
-  const fetchImpl = (typeof fetch === 'function') ? fetch : (async (u,i)=>{ const nf = await import('node-fetch'); return nf.default(u,i); });
-  const resp = await fetchImpl(url, init);
-  const text = await resp.text();
-  let json = null;
-  try{ json = JSON.parse(text); }catch(e){ json = text; }
-  if (!resp.ok) throw new Error(JSON.stringify({ status: resp.status, body: json }));
-  return json;
-}
-
-// API: list orders (via Supabase REST)
-app.get('/api/orders', async (req,res)=>{
-  try{
-    const q = '?select=*&order=created_at.asc';
-    const data = await supabaseFetch(`orders${q}`);
-    res.json(data);
-  }catch(e){ res.status(500).json({ error: String(e.message||e) }); }
-});
-
-// API: create order (proxy to Supabase)
-app.post('/api/orders', async (req,res)=>{
-  try{
-    const o = req.body || {};
-    // map frontend payload to columns
-    const payload = [{
-      fullname: o.fullname || o.name || '',
-      phone: o.phone || '',
-      email: o.email || '',
-      address: o.address || '',
-      city: o.city || '',
-      postal: o.postal || '',
-      payment: o.payment || '',
-      comments: o.comments || '',
-      cart: o.cart || {},
-      total: Number(o.total) || 0
-    }];
-    const body = JSON.stringify(payload);
-    const data = await supabaseFetch('orders', { method: 'POST', headers: { 'Content-Type':'application/json', 'Prefer':'return=representation' }, body });
-    res.json(data);
-  }catch(e){ console.error('proxy insert failed', e); res.status(500).json({ error: String(e.message||e) }); }
-});
-
-// Dequeue oldest order: fetch oldest then delete it (supabase)
-app.post('/api/orders/dequeue', async (req,res)=>{
-  try{
-    const rows = await supabaseFetch('orders?select=*&order=created_at.asc&limit=1');
-    const row = Array.isArray(rows) && rows.length ? rows[0] : null;
-    if (!row) return res.status(404).json({ error: 'no orders' });
-    // delete by id
-    await supabaseFetch(`orders?id=eq.${row.id}`, { method: 'DELETE' });
-    res.json(row);
-  }catch(e){ res.status(500).json({ error: String(e.message||e) }); }
-});
+// Note: Supabase proxy endpoints were removed to keep the local SQLite endpoints authoritative.
+// Local API endpoints above (e.g. /api/orders, /api/promotions) are used by the client when available.
 
 // Start server and write pid
 const server = app.listen(port, ()=>{

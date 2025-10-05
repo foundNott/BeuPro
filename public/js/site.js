@@ -1,6 +1,9 @@
 // site.js - consolidated client-side logic (cart LIFO, promos, comments, UI helpers)
-import { qs, qsa, getSupabase, toast, persistCartItemSupabase, getSessionId } from './core.js';
+import { qs, qsa, getSupabase, toast, persistCartItemSupabase, getSessionId, fetchOrSupabase } from './core.js';
 
+/* ===================[ LIFO: Add-to-cart (pushCart, popCart, listCart) ]=================== */
+// cartStack[100]
+// cartTop = -1
 /* ===================[ cart: data structure ]=================== */
 // cartStack[100]
 // cartTop = -1
@@ -54,12 +57,13 @@ function wireCartUI(){
 
 // Fallback: bootstrap from legacy localStorage cart if Supabase isn't available
 function bootstrapFromLocalStorage(){
-  // intentionally no-op: we do not restore previous cart items from localStorage
+  // intentionally no-op: we do not restore previous cart items from localStorage per privacy request
   return;
 }
 
 /* ------------------ Promotions ------------------ */
-async function fetchPromos(){ try{ const sb = await getSupabase(); const { data, error } = await sb.from('promotions').select('*').order('created',{ascending:false}); if (error) throw error; return data || []; }catch(e){ return []; } }
+/* ===================[ LIFO: Track Recent Promotions (pushPromotion, popPromotion, listPromotion) ]=================== */
+async function fetchPromos(){ try{ const list = await fetchOrSupabase('/api/promotions', async ()=>{ const sb = await getSupabase(); const { data, error } = await sb.from('promotions').select('*').order('created',{ascending:false}); if (error) throw error; return data || []; }); return list || []; }catch(e){ return []; } }
 function renderPromos(list){
   // populate the three image slots
   try{
@@ -95,8 +99,12 @@ const COMMENTS_KEY = 'hc_comments_v1';
 function readComments(){ try{ return JSON.parse(localStorage.getItem(COMMENTS_KEY)) || []; }catch(e){ return []; } }
 function writeComments(list){ try{ localStorage.setItem(COMMENTS_KEY, JSON.stringify(list)); }catch(e){} }
 
+/* ===================[ LIFO: List Latest Comment (pushComment, hideComment, listComments) ]=================== */
 export async function pushComment(c){ // attempt Supabase then fallback local
-  try{ const sb = await getSupabase(); const { error } = await sb.from('comments').insert([{ name: c.name || 'Guest', email: c.email || '', body: c.body || '' }]); if (error) throw error; return true; }catch(e){ const list = readComments(); list.push({ author: c.name||'Guest', body: c.body, created: Date.now() }); writeComments(list); return true; } }
+  try{
+    // prefer local API
+    try{ const localOk = await fetch('/api/health'); if (localOk.ok){ const r = await fetch('/api/comments', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(c) }); if (!r.ok) throw new Error('local insert failed'); await refreshComments(); return true; } }catch(_){ }
+    const sb = await getSupabase(); const { error } = await sb.from('comments').insert([{ name: c.name || 'Guest', email: c.email || '', body: c.body || '' }]); if (error) throw error; await refreshComments(); return true; }catch(e){ const list = readComments(); list.push({ author: c.name||'Guest', body: c.body, created: Date.now() }); writeComments(list); return true; } }
 
 function renderComments(){ const target = qs('#comments-list'); if (!target) return; target.innerHTML = ''; const list = readComments(); if (!list.length){ target.innerHTML = '<div class="comment-item">No comments yet — be the first!</div>'; return; } list.slice().reverse().forEach(c=>{ const d = document.createElement('div'); d.className='comment-item'; d.innerHTML = `<strong>${(c.author||'Guest')}</strong><div>${(c.body||'')}</div>`; target.appendChild(d); }); }
 

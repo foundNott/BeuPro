@@ -398,6 +398,7 @@
         const resp = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         if (!resp.ok){
           // Try to parse response error and fallback to Supabase push if server refuses
+            // fallthrough
           const errBody = await resp.json().catch(()=>({ error: resp.statusText }));
           const status = resp.status;
           if ((status === 405 || status === 404 || status === 501) && typeof window.pushOrder === 'function'){
@@ -436,8 +437,8 @@
   </script>
   <script src="/public/js/supabase-config.js"></script>
   <script type="module">
-    import './public/js/core.js';
-    import './public/js/site.js';
+    import '/public/js/core.js';
+    import '/public/js/site.js';
   </script>
 </body>
 </html>

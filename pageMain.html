@@ -222,15 +222,15 @@
   </script>
   <script src="/public/js/supabase-config.js"></script>
   <script type="module">
-    import './public/js/core.js';
-    import './public/js/site.js';
+    import '/public/js/core.js';
+    import '/public/js/site.js';
   </script>
   <script>
   // Keep only lightweight UI helpers on the page; cart logic now lives in shared modules (public/js/site.js)
   (function(){
     // setup smooth scrolling, FAQ and current year
     function setupSmoothNav(){ const navLinks = Array.from(document.querySelectorAll('.header-middle a[data-target]')); function onScroll(){ const fromTop = window.scrollY + 120; navLinks.forEach(link=>{ const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; const top = el.offsetTop; const bottom = top + el.offsetHeight; if (fromTop >= top && fromTop < bottom) link.classList.add('active'); else link.classList.remove('active'); }); }
-      navLinks.forEach(link=>{ link.addEventListener('click', (e)=>{ e.preventDefault(); const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; el.scrollIntoView({behavior:'smooth',block:'start'}); }); }); window.addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
+    navLinks.forEach(link=>{ link.addEventListener('click', (e)=>{ e.preventDefault(); const targetId = link.getAttribute('data-target'); const el = document.getElementById(targetId); if (!el) return; el.scrollIntoView({behavior:'smooth',block:'start'}); }); }); window.addEventListener('scroll', onScroll, { passive: true }); onScroll(); }
     function setupFAQ(){ document.querySelectorAll('.faq-item').forEach(item=>{ const btn = item.querySelector('.faq-q'); const panel = item.querySelector('.faq-a'); btn.addEventListener('click', ()=>{ const expanded = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!expanded)); panel.hidden = expanded; }); }); }
     document.addEventListener('DOMContentLoaded', ()=>{ setupSmoothNav(); setupFAQ(); const y = new Date().getFullYear(); const yr = document.getElementById('cur-year'); if (yr) yr.textContent = y; });
   })();
@@ -326,6 +326,33 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initGridState);
   } else initGridState();
+  // Wire product selection to canonical pushCart API when available
+  (function wireProductSelectionToCart(){
+    function addSetListener(){
+      document.querySelectorAll('.product-card.set-card').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const prod = { id: btn.dataset.id, name: btn.dataset.name, price: Number(btn.dataset.price) };
+          try{ if (typeof window.pushCart === 'function'){ window.pushCart(Object.assign({}, prod, { qty: 1 })); } else { const c = readCart(); c.set = prod; writeCart(c); } }catch(e){ console.warn('pushCart failed', e); }
+          // update UI selection
+          document.querySelectorAll('.product-card.set-card').forEach(s=>s.classList.remove('selected'));
+          btn.classList.add('selected');
+          // make grid show selection
+          updateGridSelectionState(readCart());
+        });
+      });
+    }
+    function addExtraOverlayListeners(){
+      document.querySelectorAll('.product-card.extra-card .add-overlay').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{ e.stopPropagation(); const card = btn.closest('.product-card'); if (!card) return; const item = { id: card.dataset.id, name: card.dataset.name, price: Number(card.dataset.price) || 0, qty:1 };
+          try{ if (typeof window.pushCart === 'function'){ window.pushCart(item); } else { const cart = readCart(); cart.extras = cart.extras || []; cart.extras.push(item); writeCart(cart); } }catch(err){ console.warn('pushCart failed', err); }
+          card.classList.add('selected'); card.setAttribute('aria-pressed','true');
+        });
+        // keyboard activation
+        btn.addEventListener('keydown', (ev)=>{ if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); btn.click(); } });
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>{ addSetListener(); addExtraOverlayListeners(); }); else { addSetListener(); addExtraOverlayListeners(); }
+  })();
 })();
 </script>
 // ...existing code...

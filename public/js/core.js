@@ -34,6 +34,17 @@ export async function isLocalApiAvailable(){
   try{ const r = await fetch('/api/health', { method:'GET' }); return r.ok; }catch(e){ return false; }
 }
 
+// Try local API path first, otherwise call the provided Supabase fetch function
+export async function fetchOrSupabase(localPath, supabaseFetch){
+  try{
+    if (await isLocalApiAvailable()){
+      const r = await fetch(localPath);
+      if (r.ok) return await r.json();
+    }
+  }catch(_){ }
+  return await supabaseFetch();
+}
+
 // small LIFO implementation for cart/promotions/comments (bounded stack)
 export function createStack(limit = 100){
   const arr = [];
@@ -111,4 +122,49 @@ export function toast(message, opts={timeout:3000}){
 if (typeof window !== 'undefined'){
   window.persistCartItem = window.persistCartItem || persistCartItemSupabase;
   window.getSessionId = window.getSessionId || getSessionId;
+}
+
+// -------------------- AUTH: sign-in handler (merged from login.js) --------------------
+// If the login page includes an element with id 'sign-in', wire a small sign-in handler.
+if (typeof window !== 'undefined'){
+  (function(){
+    // Supabase sign-in helper (kept as fallback)
+    async function signInWithSupabase(email, password){ const sb = await getSupabase(); return sb.auth.signInWithPassword({ email, password }); }
+
+    // Local admin sign-in (uses /api/admin/signin)
+    async function signInLocal(email, password){
+      const r = await fetch('/api/admin/signin', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ email, password }) });
+      if (!r.ok) throw new Error((await r.json()).error || 'signin failed');
+      return await r.json();
+    }
+
+    // Combined signIn: prefer local API when present, otherwise try Supabase
+    async function signIn(email, password){
+      try{
+        if (await isLocalApiAvailable()) return await signInLocal(email, password);
+      }catch(_){ }
+      // fallback to Supabase (may throw 'Supabase not configured')
+      return await signInWithSupabase(email, password);
+    }
+
+    function initLogin(){
+      const btn = document.getElementById('sign-in');
+      const msg = document.getElementById('login-msg');
+      if (!btn) return;
+      btn.addEventListener('click', async ()=>{
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        if (!email || !password){ if (msg) msg.textContent = 'Email and password required'; return; }
+        if (msg) msg.textContent = 'Signing in...';
+        try{
+          const res = await signIn(email,password);
+          // local response: { user: {...} }, supabase: { data, error }
+          const user = res?.user || (res && res.data && res.data.user) ? (res.user || res.data.user) : null;
+          if (!user){ if (msg) msg.textContent = 'Sign in failed'; return; }
+          window.location.href = '/admin.html';
+        }catch(e){ if (msg) msg.textContent = 'Sign in error: '+(e.message||e); }
+      });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLogin); else initLogin();
+  })();
 }
