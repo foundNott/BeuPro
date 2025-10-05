@@ -223,8 +223,11 @@
       if (window.scrollY > 10) header.classList.add('scrolled'); else header.classList.remove('scrolled');
     });
   </script>
-  <script src="/public/js/promos.js"></script>
-  <script src="/public/js/cart-sync.js"></script>
+  <script src="/public/js/supabase-config.js"></script>
+  <script type="module">
+    import './public/js/core.js';
+    import './public/js/site.js';
+  </script>
   <script>
   /* ===================[ Cart LIFO helpers + Undo toast ]=================== */
   (function(){

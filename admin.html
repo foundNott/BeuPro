@@ -13,13 +13,15 @@
     header.top-header a{color:inherit}
   /* place sidebar at the left edge and keep main content to the right */
   .admin-layout{display:flex;gap:20px;width:100%;padding:20px 40px 40px 40px;box-sizing:border-box}
-  .admin-sidebar{width:220px;position:fixed;left:20px;top:80px}
+  .admin-sidebar{width:220px;position:fixed;left:20px;top:80px;bottom:20px;overflow:auto}
   .admin-main{margin-left:260px;flex:1}
     .admin-page{display:none}
     .admin-page.is-active{display:block}
     .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .list{margin-top:12px}
     .item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:6px;background:rgba(0,0,0,0.03);margin-bottom:6px}
+    .admin-nav a{display:block;padding:8px 10px;border-radius:6px;color:inherit;text-decoration:none}
+    .admin-nav a.active{background:#FFF7E7;color:#000;font-weight:700}
   </style>
 </head>
 <body class="admin">
@@ -56,16 +58,23 @@
           <h2>Orders (FIFO Queue)</h2>
           <div style="display:flex;gap:18px;align-items:flex-start">
             <div style="flex:1">
-              <div class="controls">
-                <input id="cust-name" placeholder="Customer name" class="input small">
-                <input id="cust-phone" placeholder="Phone" class="input small">
-                <button id="enq-cust" class="btn">Enqueue Order</button>
-                <button id="deq-cust" class="btn secondary">Accept Next Order</button>
-              </div>
               <div class="muted small">Order queue (oldest at top)</div>
               <div id="cust-list" class="list"></div>
             </div>
-            <div style="width:360px">
+            <div style="width:360px;max-height:calc(100vh - 180px);overflow:auto;display:flex;flex-direction:column;gap:12px">
+              <div style="background:rgba(0,0,0,0.02);padding:12px;border-radius:8px">
+                <h3 style="margin:0 0 8px 0">Add Customer / Quick Order</h3>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;gap:8px">
+                    <input id="cust-name" placeholder="Customer name" class="input small" style="flex:1">
+                    <input id="cust-phone" placeholder="Phone" class="input small" style="width:120px">
+                  </div>
+                  <div style="display:flex;gap:8px">
+                    <button id="enq-cust" class="btn">Enqueue Order</button>
+                    <button id="deq-cust" class="btn secondary">Accept Next Order</button>
+                  </div>
+                </div>
+              </div>
               <div style="background:rgba(0,0,0,0.02);padding:12px;border-radius:8px">
                 <h3 style="margin:0 0 8px 0">Quick Order</h3>
                 <div style="display:flex;flex-direction:column;gap:8px">
@@ -78,8 +87,10 @@
                       <label><input type="checkbox" data-id="set-c-1" class="admin-prod"> Set-C (1 Set)</label>
                       <label><input type="checkbox" data-id="set-c-2" class="admin-prod"> Set-C (2 Sets)</label>
                       <label><input type="checkbox" data-id="set-c-3" class="admin-prod"> Set-C (3 Sets)</label>
-                    <label><input type="checkbox" data-id="extra-1" class="admin-prod"> IBB Soap</label>
-                    <label><input type="checkbox" data-id="extra-2" class="admin-prod"> Sunshield SPF50</label>
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <label style="display:flex;align-items:center;gap:8px"><span style="flex:1">IBB Soap (qty)</span><input id="qty-extra-1" type="number" min="0" value="0" style="width:70px"></label>
+                      <label style="display:flex;align-items:center;gap:8px"><span style="flex:1">Sunshield SPF50 (qty)</span><input id="qty-extra-2" type="number" min="0" value="0" style="width:70px"></label>
+                    </div>
                   </div>
                   <select id="quick-payment" class="input small"><option value="cod">COD</option><option value="gpay">GCash</option></select>
                   <button id="quick-place" class="btn">Add Order</button>
@@ -149,10 +160,12 @@
     </main>
   </div>
 
-  <script src="./public/js/toast-plain.js"></script>
-  <!-- Optional: provide Supabase config at public/js/supabase-config.js -->
+  <!-- Supabase config -->
   <script src="/public/js/supabase-config.js"></script>
-  <script type="module" src="./public/js/admin.js"></script>
+  <script type="module">
+    import './public/js/core.js';
+    import './public/js/admin.js';
+  </script>
 
   <!-- Login modal (simple) -->
   <div id="login-modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:1300">
